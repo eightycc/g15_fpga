@@ -1,0 +1,227 @@
+// ----------------------------------------------------------------------------
+// Copyright 2024 Robert E. Abeles
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+//
+// Licensed under the Solderpad Hardware License v 2.1 (the "License");
+// you may not use this file except in compliance with the License, or, at
+// your option, the Apache License, Version 2.0. You may obtain a copy of
+// the License at: https://solderpad.org/licenses/SHL-2.1/
+//
+// Unless required by applicable law or agreed to in writing, any work
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Bendix G-15 Input Output 1 & 2 (Page 2, 3D588)
+// ----------------------------------------------------------------------------
+`timescale 1ns / 1ps
+
+module io_1_2 (
+    input logic rst,
+    input logic CLOCK,
+    
+    input logic T0, T21, T29,
+    input logic TF,
+
+    input logic C1, CV,
+    input logic S0, S1, S2,
+
+    input logic AS,
+    input logic AUTO,     // (11) AS & SLOW_IN
+    input logic CC,
+    input logic CIR_4,
+    input logic CIR_A,    // (5,6) ~OD & CIR_Q
+    input logic CIR_C,    // (5,6) OG & OY & FAST_OUT
+    input logic CIR_D,    // (5,6) OD & CIR_Q
+    input logic CIR_F,    // (5,6) T0 & OE
+    input logic CIR_G,    // (5,6) T0 & ~OE
+    input logic CIR_M,    // (5,6) CIR_N & SLOW_OUT & ~OE
+    input logic CIR_N,    // (5,6) T1 & OZ
+    input logic CIR_Q,    // (5,6) ~AS & OG & SLOW_OUT & STOP_OB
+    input logic CIR_S,    // (5,6) CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
+    input logic CIR_U,    // (11) OC1 | OC2
+    input logic CIR_W,    // (3,4) CIR_U & CIR_F & ~OY & FAST_OUT & ~OB3
+    input logic CIR_Z,    // (5,6) ~OY & ~OG & TF & FAST_OUT & OB3
+    input logic DS,
+    input logic FAST_IN,
+    input logic FAST_OUT,
+    input logic KEY_A,
+    input logic KEY_E,
+    input logic KEY_FB,   // <F-B> Typewriter feedback
+    input logic KEY_T,
+    input logic HC,
+    input logic IN,
+    input logic M2,
+    input logic M3,
+    input logic M19,
+    input logic M23,
+    input logic MZ,
+    input logic OA1, OA3, OA4,
+    input logic OB2, OB3, OB4, OB5,
+    input logic OC1, OC2, OC4,
+    input logic OUT,
+    input logic OS,
+    input logic READY,
+    input logic SLOW_OUT,
+    input logic STOP_OB,
+    input logic SW_SA,
+    input logic TAB_OB,
+    input logic CR_TAB_OB,
+    input logic TYPE,
+    input logic WAIT_OB,
+    
+    output logic CIR_H,
+    output logic OD,
+    output logic OE,
+    output logic OG,
+    output logic OH, //OH_s,
+    output logic OY,
+    output logic OF1, OF2, OF3,
+    output logic DIGIT_OF,
+    output logic SIGN_OF,
+    output logic CR_TAB_OF,
+    output logic WAIT_OF
+);
+    
+    logic CIR_J;
+    logic OD_s, OD_r;
+    logic OE_s, OE_r;
+    logic OG_s, OG_r;
+    logic OH_s, OH_r;
+    logic OY_s, OY_r;
+    logic OF1_s, OF1_r;
+    logic OF2_s, OF2_r;
+    logic OF3_s, OF3_r;
+    logic RELOAD_OF;
+    logic STOP_OF;
+    
+    // ---------------------------------------------------------------------------------
+    // OF register control character decode
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+      DIGIT_OF  = ~OF1 & ~OF2 & ~OF3;
+      SIGN_OF   =  OF1 & ~OF2 & ~OF3;
+      CR_TAB_OF =         OF2 & ~OF3;
+      STOP_OF   = ~OF1 & ~OF2 &  OF3;
+      RELOAD_OF =  OF1 & ~OF2 &  OF3;
+      WAIT_OF   =  OF1 &  OF2 &  OF3;
+    end
+
+    // ---------------------------------------------------------------------------------
+    // OF: During input processing, OF1 and OF2 synchronize sampling the input data
+    //     and the CIR_E signal. OF3 selects 1 or 4 bit precession for slow input.
+    //
+    //     For slow output, OF1, OF2, and OF3 form a shift register used during
+    //     output formatting.
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+
+      CIR_H =   (OY & ~OG & FAST_OUT & ~OB2 & OB4)
+              | (OY & ~OG & FAST_OUT & OC1 & ~OC2);
+
+      // CIR_J: Shift OF1->OF2 control
+      CIR_J =   (IN)        // In:  IN decode in OC
+              | (CIR_A)     // Out: CIR_Q (MZ->OF1, OF2->OF3->MZ control) & ~OD
+              | (CIR_D);    // Out: CIR_Q (MZ->OF1, OF2->OF3->MZ control) & OD
+
+      OF1_s =   (IN & HC & ~OF2 & ~STOP_OB)   // In:  HC synchronization
+              | (CIR_A & MZ)                  // Out: MZ->OF1
+              | (CIR_C & OA4)
+              | (CIR_U & STOP_OF & SLOW_OUT & ~OG & M19) // convert STOP to RELOAD (M19 != 0)
+              | (CIR_U & CIR_D & M2)
+              | (CIR_D & ~OC1 & ~OC2 & M3);
+      OF1_r =   (IN & ~HC)                    // Input HC synchronization
+              | (CIR_A & ~MZ)                 // Output MZ->OF1
+              | (CIR_H)
+              | (CIR_U & CIR_D & ~M2)
+              | (CIR_D & ~OC1 & ~OC2 & ~M3)
+              | (READY);
+                   
+      OF2_s =   (READY & SW_SA & KEY_T & CC & T21)
+              | (CIR_J & OF1);                // I/O: OF1->OF2  
+      OF2_r =   (READY & T29)
+              | (CIR_J & (OUT | TF) & ~OF1);  // I/O: OF1->OF2
+                
+      OF3_s =   (OA3 & OG & TF & AUTO & OH & OS)
+              | (CIR_S & CR_TAB_OB)                 // SLOW_IN
+              | (CIR_Q & OF2)
+              | (~(DS & S1) & ~OF2 & FAST_IN);
+      OF3_r =   (CIR_Q & ~OF2)
+              | (READY)
+              | (CIR_S & OB5)
+              | (CIR_S & WAIT_OB);
+    end       
+    
+    
+    // ---------------------------------------------------------------------------------
+    // OD: I/O section busy
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+      OD_s =   (DS & S2)                           // @TR slow out cmd 
+             | (DS & S0 & CIR_U)                   // @TR fast out cmd (not set ready)
+             | (CIR_N & SW_SA & KEY_A)             // Key A @(T1&OZ) 
+             | (CIR_Z)                             // ~OY & ~OG & TF & FAST_OUT & OB3
+             | (CIR_F & RELOAD_OF & SLOW_OUT)      // @(T0&OE) slow out RELOAD
+             | (AUTO & OG & TF & OA3)              // in m23 full 4 bits
+             | (AUTO & OG & TF & M23)              // in m23 full 1 bit
+             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // slow in
+             | (CIR_M & OH & ~OA1);                // slow out
+      OD_r =   (CIR_F & OD)                        // @(T0&OE)
+             | (~OC4 & ~HC & T0 & AS);             // (ANC-2 installed)
+    end
+
+    always_comb begin
+      // OE:             
+      OE_s =   (CIR_G & OH & SLOW_OUT)
+             | (CIR_G & OY & SLOW_OUT)
+             | (CIR_G & OG & ~AS & FAST_OUT)
+             | (CIR_G & OD & IN);
+      OE_r = CIR_F;
+    
+      // OG: Precession control
+      OG_s =   (CIR_S & OB5)                       // Slow in digit
+             | (CIR_S & WAIT_OB)                   // Slow in wait
+             | (CIR_S & TAB_OB)                    // Slow in tab
+             | (CIR_N & ~OE & OY & SLOW_OUT)
+             | (CIR_Z)
+             | (CIR_H)
+             | (~OG & OH & OS & TF & AUTO);
+      OG_r =   ~(   (CIR_S & OB5)
+                  | (CIR_S & WAIT_OB)
+                  | (CIR_S & TAB_OB) ) & OG & TF;
+    
+      // OH:
+      OH_s =   (IN & CIR_4 & C1 & DS & ~CV)        // auto-reload input op, char=0
+             | (SW_SA & KEY_E)
+             | (OY & T0 & AS & TYPE);
+      OH_r =   (READY)
+             | (TYPE & T0 & ~OY);
+
+      // OY:            
+      OY_s =   (TF & DS & C1 & ~CV & AUTO)
+             | (T0 & ~OS & SLOW_OUT & ~HC & ~OH & ~OY)  // 
+             | (AUTO & TF & OG & OA3)
+             | (AUTO & TF & OG & M23)
+             | (CIR_S & ~AS & ~OB2 & OB3 & ~OB5)       // [STOP + RELOAD]OB
+             | (CIR_W)
+             | (CIR_Z)
+             | (SW_SA & KEY_E & T0);
+      OY_r =   (OY & TF & IN)
+             | (KEY_FB & ~OH & TYPE & AS)
+             | (CIR_F & TYPE & OY)
+             | (CIR_H & OF1)
+             | (READY);
+    end              
+    
+    sr_ff ff_OD ( .clk(CLOCK), .rst(rst), .s(OD_s), .r(OD_r), .q(OD) );
+    sr_ff ff_OE ( .clk(CLOCK), .rst(rst), .s(OE_s), .r(OE_r), .q(OE) );
+    sr_ff ff_OG ( .clk(CLOCK), .rst(rst), .s(OG_s), .r(OG_r), .q(OG) );
+    sr_ff ff_OH ( .clk(CLOCK), .rst(rst), .s(OH_s), .r(OH_r), .q(OH) );
+    sr_ff ff_OY ( .clk(CLOCK), .rst(rst), .s(OY_s), .r(OY_r), .q(OY) );
+    sr_ff ff_OF1 ( .clk(CLOCK), .rst(rst), .s(OF1_s), .r(OF1_r), .q(OF1) );
+    sr_ff ff_OF2 ( .clk(CLOCK), .rst(rst), .s(OF2_s), .r(OF2_r), .q(OF2) );
+    sr_ff ff_OF3 ( .clk(CLOCK), .rst(rst), .s(OF3_s), .r(OF3_r), .q(OF3) );
+endmodule
