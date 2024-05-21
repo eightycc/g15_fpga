@@ -83,6 +83,7 @@ module cpu_top (
     input logic CIR_V,
     input logic READY,
     input logic EB19,
+    input logic EB23,
     
     // Memory
     input logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9,

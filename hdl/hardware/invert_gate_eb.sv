@@ -25,7 +25,7 @@ module invert_gate_eb (
 
     input logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9, 
     input logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18, EB19,
-    input logic EB21, EB22, EB25, EB26, EB27, EB28_29, EB29, EB30_31, EB31, EB32,
+    input logic EB21, EB22, EB23, EB25, EB26, EB27, EB28_29, EB29, EB30_31, EB31, EB32,
     
     
     input logic DA_OVFLW,
@@ -75,7 +75,8 @@ module invert_gate_eb (
       // EB: Early Bus Mux
       EB =   EB0 | EB1 | EB2 | EB3 | EB4 | EB5 | EB6 | EB7 | EB8 | EB9
            | EB10 | EB11 | EB12 | EB13 | EB14 | EB15 | EB16 | EB17 | EB18 | EB19
-           | EB21 | EB22 | EB25 | EB26 | EB27 | EB28_29 | EB29 | EB30_31 | EB31 | EB32;
+           | EB21 | EB22 | EB23 |EB25 | EB26 | EB27 | EB28_29 | EB29
+           | EB30_31 | EB31 | EB32;
 
       // Convenience decodes not part of original schematics
       // TR or TVA to ID, MQ, or PN during sign-bit transfer

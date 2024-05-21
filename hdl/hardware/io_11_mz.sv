@@ -29,7 +29,7 @@ module io_11_mz (
 
     input logic C1, CV,
     input logic D4, D5, DX,
-    input logic S5, SX,
+    input logic S4, S5, SX,
 
     input logic CIR_C,
     input logic CIR_Q,
@@ -75,7 +75,7 @@ module io_11_mz (
     output logic CIR_DELTA,
     output logic CIR_EPSILON,
     output logic CIR_GAMMA,
-    output logic EB19,
+    output logic EB19, EB23,
     output logic M19,
     output logic M23,
     output logic MZ,
@@ -98,7 +98,8 @@ module io_11_mz (
       CIR_EPSILON = T0 & CIR_BETA;
       CIR_DELTA = ~T29 & CIR_BETA & CN;
       CIR_GAMMA = CIR_ALPHA & CIR_V & M19_insert;
-      EB19 = M23 & S5 & SX;
+      EB19 = M19 & S4 & SX;
+      EB23 = M23 & S5 & SX;
     end
     
     always_comb begin

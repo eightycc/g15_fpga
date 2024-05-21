@@ -154,7 +154,7 @@ module g15_top (
     logic READY;
     logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9;
     logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18, EB19;
-    logic EB21, EB22, EB25, EB26, EB27, EB31;
+    logic EB21, EB22, EB23, EB25, EB26, EB27, EB31;
 
     // Gated command register shift clock
     always_comb begin

@@ -127,5 +127,5 @@ module control_switch (
     sr_ff ff_CV ( .clk(CR), .rst(rst), .s(CW), .r(~CW), .q(CV) );
     //    Characteristic field bits 13 to 12
     sr_ff ff_CW ( .clk(CR), .rst(rst), .s(CX), .r(~CX), .q(CW) );
-    sr_ff ff_CX ( .clk(CLOCK), .rst(rst), .s(RC & CJ & ~CI), .r(RC & CJ & CI), .q(CX) );
+    sr_ff ff_CX ( .clk(CLOCK), .rst(rst), .s(RC & CJ & CI), .r(RC & CJ & ~CI), .q(CX) );
 endmodule

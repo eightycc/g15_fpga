@@ -78,7 +78,7 @@ module io_top (
     input logic AR,
     input logic C1, C7, C8, C9, CU, CV, CW, CX,
     input logic D4, D5, DX,
-    input logic S0, S1, S2, S3, S5, S7, SU, SV, SW, SX,
+    input logic S0, S1, S2, S3, S4, S5, S7, SU, SV, SW, SX,
 
     input logic LB,
 
@@ -95,7 +95,7 @@ module io_top (
     input logic CN,
     input logic M2, M3,
     output logic M19, M23,
-    output logic EB19,
+    output logic EB19, EB23,
 
     input logic T0, T1, T2, T21, T29,
     input logic TE, TF

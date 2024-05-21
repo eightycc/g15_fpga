@@ -195,14 +195,16 @@ module control_gate (
 
       // CI: Complimented command input
       CI = ~(  (KEY_RETURN & ~M0)
-             | (RC & ~CG & MC_not)
-             | (SW_SA & W107 & KEY_F)              // Block CI
-             | (PWR_ATS & W107) );                 // Block CI
+             | (RC & ~CG & MC_not)                 // Read command from M line
+             | (RC & CG & ~AR)                     // Read command from AR
+             | (W107 & SW_SA & KEY_F)              // Block CI
+             | (W107 & PWR_ATS) );                 // Block CI
     
-      // CJ
-      CJ_s =   (T21 & CZ & ~CH & CC & ~CK)         // WRC->RC next cycle
+      // CJ: True during static portion command during RC cycle
+      //     Gates CK 'start RC' during cycle prior to RC
+      CJ_s =   (T21 & CC & ~CK & ~CH & CZ)         // WRC->RC next cycle
              | (T1 & DS & S5 & SV)                 // MARK EXIT
-             | (T13 & DS & S5 & SU & CC & ~CJ);    // RETURN EXIT
+             | (T13 & CC & ~CJ & DS & S5 & SU);    // RETURN EXIT
 
       CJ_r =   (T13 & TR & CJ)                     // T13 of TR cycle
              | (T13 & ~CQ & CJ);                   // T13 of RC cycle
@@ -271,11 +273,7 @@ module control_gate (
       CU =   (CM & ~(   (DS & S5 & SV & CJ)  // Mark Exit
                       | (RC & ~CJ)
                       | (KEY_RETURN))) 
-           | (~CJ & (   (KEY_RETURN & ~M0)
-                      | (RC & ~CG & ~AR)
-                      | (RC & CG & AR)
-                      | (SW_SA & W107 & KEY_F)
-                      | (PWR_ATS & W107)));
+           | (~CJ & ~CI);                    // Load dynamic portion of command
       
       //  CD addend
       CD = CT & CN;
@@ -290,10 +288,10 @@ module control_gate (
       CB = CU & CT & CN;
     
       //  CC flip-flop: adder carry flag
-      CC_s =   T1 | T13 | T21| CB;
+      CC_s =   T1 | T13 | T21 | CB;
       CC_r = ~T1 & ~T13 & ~T21 & ~CU & ~CD;
     
-      //  CT flip-flop: select addend bits from Command Register
+      //  CT flip-flop: select addend bits from Number Track
       CT_s =   (T1 & CN)   // start selection at bit 2 for word 107
              | (T2 & RC);  // start selection at bit 3 for all others during RC
       CT_r =   (T28)         // end selection at bit 29
