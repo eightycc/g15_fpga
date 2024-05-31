@@ -82,7 +82,7 @@ module io_3_4 (
     output logic STOP_OB,
     output logic HC,
     output logic OA1, OA2, OA3, OA4,
-    output logic OB2, OB3, OB4, OB5,
+    output logic OB1, OB2, OB3, OB4, OB5,
     output logic OS,
     output logic WAIT_OB
 );
@@ -93,7 +93,7 @@ module io_3_4 (
     logic OA3_s, OA3_r;
     logic OA4_s, OA4_r;
     logic OAx_r;
-    logic OB1_s, OB1_r, OB1;
+    logic OB1_s, OB1_r;
     logic OB2_s, OB2_r;
     logic OB3_s, OB3_r;
     logic OB4_s, OB4_r;

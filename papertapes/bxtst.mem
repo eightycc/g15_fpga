@@ -7,9 +7,10 @@
 //
 // Bytes contain a bit-reversed 5-level G-15 code in their
 // low-order 5 bits. Runs of 00 are blank tape.
-// At an estimated speed of 20 CPS or 50ms/character, the 77
-// character runs of blanks allow a tape stop runway of well in
-// excess of 1.6 seconds.
+//
+// At an estimated speed of 200 CPS or 5ms/character, the 77
+// character runs of blanks that occur between blocks allow a
+// tape stop/start runway of about 385ms.
 // ------------------------------------------------------------------
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 11

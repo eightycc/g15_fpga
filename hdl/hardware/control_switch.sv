@@ -26,13 +26,12 @@ module control_switch (
     input logic CIR_2, CIR_3, CIR_4,
     input logic CI,
     input logic CJ,
-    input logic CR,
     input logic M20,
     input logic PJ,
     input logic RC,
     input logic TR,
 
-    output logic C1, C3, C5, C6, C7, C8, C9,
+    output logic C1, C2, C3, C4, C5, C6, C7, C8, C9,
     output logic CU, CV, CW, CX,
 
     output logic D0, D1, D2, D3, D4, D5, D6, D7, DU, DV, DW, DX,
@@ -53,8 +52,21 @@ module control_switch (
     output logic EB29
 );
 
-    logic C2, C4;
     logic RING_BELL;
+    logic CR;
+    logic CX_s, CX_r;
+
+    // -----------------------------------------------------------------------
+    // Gated command register shift clock
+    // -----------------------------------------------------------------------
+    always_comb begin
+      CR = RC & CJ & CLOCK;
+    end
+
+    always_comb begin
+      CX_s = RC & CJ & CI;
+      CX_r = RC & CJ & ~CI;
+    end
 
     // -----------------------------------------------------------------------
     // Static source and destination decoders
@@ -127,5 +139,5 @@ module control_switch (
     sr_ff ff_CV ( .clk(CR), .rst(rst), .s(CW), .r(~CW), .q(CV) );
     //    Characteristic field bits 13 to 12
     sr_ff ff_CW ( .clk(CR), .rst(rst), .s(CX), .r(~CX), .q(CW) );
-    sr_ff ff_CX ( .clk(CLOCK), .rst(rst), .s(RC & CJ & CI), .r(RC & CJ & ~CI), .q(CX) );
+    sr_ff ff_CX ( .clk(CLOCK), .rst(rst), .s(CX_s), .r(CX_r), .q(CX) );
 endmodule

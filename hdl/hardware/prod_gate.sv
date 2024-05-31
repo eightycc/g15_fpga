@@ -140,12 +140,6 @@ module prod_gate (
     // Product Adder
     // -----------------------------------------------------------------------
     always_comb begin
-      // PA:
-      PA =   (~PC & ~PD &  PU)
-           | (~PC &  PD & ~PU)
-           | ( PC & ~PD & ~PU)
-           | ( PC &  PD &  PU);
-
       // PD:
       PD =   (LB & D7 & DW) // Add to PN
            | (LB & ~TE & DS & S6 & SV) // Divide LB->PD execpt bit 29 of odd word
@@ -158,6 +152,12 @@ module prod_gate (
                    | (TR & D6 & DV & ~CW & (CS | ~CX))
                    | (PP & M2 & DS & S5 & SX & CIR_3) );
       PU = ~PU_block & PP;
+
+      // PA:
+      PA =   (~PC & ~PD &  PU)
+           | (~PC &  PD & ~PU)
+           | ( PC & ~PD & ~PU)
+           | ( PC &  PD &  PU);
 
       // PC: Product Adder Carry Register
       //  PC_s:   IB is -0 or -1/2 (T29 & TR & IS & IC)

@@ -23,6 +23,11 @@ module io_top (
     input logic rst,
     input logic CLOCK,
 
+    output logic AS,
+    output logic OB1, OB2, OB3, OB4, OB5,
+    output logic OH,
+    output logic OY,
+
     // Control Interface
     input logic PWR_ATS,
     input logic PWR_CLEAR,
@@ -46,6 +51,7 @@ module io_top (
 
     input logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
 
+    output logic TYPE,
     output logic TYPE_PULSE,
     output logic READY,
 
@@ -103,21 +109,21 @@ module io_top (
 );
 
     // I/O section local signals
-    logic AS;
+    //logic AS;
     logic AUTO;
     logic HC;
     logic OD;
     logic OE;
     logic OG;
-    logic OH;
-    logic OY;
+    //logic OH;
+    //logic OY;
     logic OS;
     logic OZ;
 
     logic MZ;
 
     logic OA1, OA2, OA3, OA4;
-    logic OB2, OB3, OB4, OB5;
+    //logic OB2, OB3, OB4, OB5;
     logic OC1, OC2, OC3, OC4;
     logic OF1, OF2, OF3;
 
@@ -160,7 +166,7 @@ module io_top (
 
     logic STOP_OB, TAB_OB, CR_TAB_OB, WAIT_OB;
     logic DIGIT_OF, CR_TAB_OF, WAIT_OF, SIGN_OF;
-    logic TYPE;
+    //logic TYPE;
 
     io_1_2 io_1_2 (.*);
     io_3_4 io_3_4 (.*);

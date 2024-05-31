@@ -145,7 +145,8 @@ module io_1_2 (
       OF2_r =   (READY & T29)
               | (CIR_J & (OUT | TF) & ~OF1);  // I/O: OF1->OF2
                 
-      OF3_s =   (OA3 & OG & TF & AUTO & OH & OS)
+      OF3_s =   (OA3 & OG & TF & AUTO & OH & OS)    // (G-III)
+      //        (CIR_G & TYPE & OY)                 // (~G-III)
               | (CIR_S & CR_TAB_OB)                 // SLOW_IN
               | (CIR_Q & OF2)
               | (~(DS & S1) & ~OF2 & FAST_IN);
@@ -157,61 +158,90 @@ module io_1_2 (
     
     
     // ---------------------------------------------------------------------------------
-    // OD: I/O section busy
+    // OD:
     // ---------------------------------------------------------------------------------
     always_comb begin
+      // CIR_F: T29 of W107 (T0 & OE)
+      // CIR_M: CIR_N & SLOW_OUT & ~OE
+      // CIR_N: T1 & OZ
+      // CIR_S: CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
+      // CIR_U: Not "SET READY" when combined with S0 (OC1 | OC2)
+      // CIR_Z: ~OY & ~OG & TF & FAST_OUT & OB3
       OD_s =   (DS & S2)                           // @TR slow out cmd 
-             | (DS & S0 & CIR_U)                   // @TR fast out cmd (not set ready)
-             | (CIR_N & SW_SA & KEY_A)             // Key A @(T1&OZ) 
-             | (CIR_Z)                             // ~OY & ~OG & TF & FAST_OUT & OB3
+             | (DS & S0 & CIR_U)                   // @TR fast out cmd (not "SET READY")
+             | (CIR_N & SW_SA & KEY_A)             // @(T1&OZ) Key A(type AR) 
+             | (CIR_Z)                             // @TF ~OY & ~OG & FAST_OUT & OB3
              | (CIR_F & RELOAD_OF & SLOW_OUT)      // @(T0&OE) slow out RELOAD
-             | (AUTO & OG & TF & OA3)              // in m23 full 4 bits
-             | (AUTO & OG & TF & M23)              // in m23 full 1 bit
-             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // slow in
-             | (CIR_M & OH & ~OA1);                // slow out
-      OD_r =   (CIR_F & OD)                        // @(T0&OE)
-             | (~OC4 & ~HC & T0 & AS);             // (ANC-2 installed)
+      //     | (~OB5 & OB3 & ~OB2 & CIR_S)         // @TR slow in (~G-III)
+             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // slow in (G-III)
+             | (AUTO & OG & TF & OA3)              // in m23 full 4 bits (G-III)
+             | (AUTO & OG & TF & M23)              // in m23 full 1 bit (G-III)
+             | (CIR_M & OH & ~OA1);                // @(T1&OZ) slow out (G-III)
+      OD_r =   (CIR_F & OD)                        // @(T0&OE&OD)
+             | (~OC4 & ~HC & T0 & OH);             // (ANC-2, G-III)
+      //     | (~OC4 & ~HC & T0 & AS);             // (~ANC-2, G-III)
     end
 
+    // ---------------------------------------------------------------------------------
+    // OE:
+    // ---------------------------------------------------------------------------------
     always_comb begin
-      // OE:             
-      OE_s =   (CIR_G & OH & SLOW_OUT)
-             | (CIR_G & OY & SLOW_OUT)
-             | (CIR_G & OG & ~AS & FAST_OUT)
+      // CIR_F: OE & T0  
+      // CIR_G: ~OE & T0           
+      OE_s =   (CIR_G & OH & SLOW_OUT)             // @(T0&~OE)
+             | (CIR_G & OY & SLOW_OUT)             // @(T0&~OE)
+      //     | (CIR_G & OD & FAST_OUT)             // @(T0&~OE) (~G-III)
+      //     | (CIR_G & OD & FAST_OUT & ~AS)       // @(T0&~OE) (~ANC-2, G-III)
+             | (CIR_G & OD & FAST_OUT & ~OH)       // @(T0&~OE) (ANC-2, G-III)
              | (CIR_G & OD & IN);
-      OE_r = CIR_F;
+      OE_r = CIR_F;                                // @(T0&OE)
+    end
     
-      // OG: Precession control
+    // ---------------------------------------------------------------------------------
+    // OG: Precession control
+    // ---------------------------------------------------------------------------------
+    always_comb begin
       OG_s =   (CIR_S & OB5)                       // Slow in digit
              | (CIR_S & WAIT_OB)                   // Slow in wait
              | (CIR_S & TAB_OB)                    // Slow in tab
              | (CIR_N & ~OE & OY & SLOW_OUT)
              | (CIR_Z)
              | (CIR_H)
-             | (~OG & OH & OS & TF & AUTO);
+             | (~OG & OH & OS & TF & AUTO);        // (G-III)
       OG_r =   ~(   (CIR_S & OB5)
                   | (CIR_S & WAIT_OB)
                   | (CIR_S & TAB_OB) ) & OG & TF;
+    end
     
-      // OH:
-      OH_s =   (IN & CIR_4 & C1 & DS & ~CV)        // auto-reload input op, char=0
-             | (SW_SA & KEY_E)
-             | (OY & T0 & AS & TYPE);
-      OH_r =   (READY)
-             | (TYPE & T0 & ~OY);
+    // ---------------------------------------------------------------------------------
+    // OH: 
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+      OH_s =   (IN & CIR_4 & DS & ~CV & C1)        // auto-reload input op, char=0 (G-III)
+             | (SW_SA & KEY_E)                     // (G-III)
+             | (OY & T0 & AS & TYPE);              // (G-III)
+      OH_r =   (READY)                             // (G-III)
+             | (TYPE & T0 & ~OY);                  // (G-III)
+    end
 
-      // OY:            
-      OY_s =   (TF & DS & C1 & ~CV & AUTO)
-             | (T0 & ~OS & SLOW_OUT & ~HC & ~OH & ~OY)  // 
-             | (AUTO & TF & OG & OA3)
-             | (AUTO & TF & OG & M23)
-             | (CIR_S & ~AS & ~OB2 & OB3 & ~OB5)       // [STOP + RELOAD]OB
+    // ---------------------------------------------------------------------------------
+    // OY:
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+      OY_s =   (TF & DS & ~CV & C1 & AUTO)         // (G-III)
+      //     | (SLOW_OUT & CIR_G & ~HC)            // (~G-III)
+             | (SLOW_OUT & T0 & ~OS & ~HC & ~OH & ~OY)  // (G-III)
+             | (AUTO & TF & OG & OA3)              // (G-III)
+             | (AUTO & TF & OG & M23)              // (G-III)
+      //     | (CIR_S & ~OB2 & OB3 & ~OB5)         // (~G-III) [STOP + RELOAD]OB
+             | (CIR_S & ~OB2 & OB3 & ~OB5 & ~AS)   // (G-III) [STOP + RELOAD]OB
              | (CIR_W)
              | (CIR_Z)
-             | (SW_SA & KEY_E & T0);
+             | (SW_SA & KEY_E & T0);               // (G-III)
       OY_r =   (OY & TF & IN)
-             | (KEY_FB & ~OH & TYPE & AS)
-             | (CIR_F & TYPE & OY)
+             | (KEY_FB & ~OH & TYPE & AS)          // (G-III)
+      //     | (CIR_F & TYPE)                      // (~G-III)
+             | (CIR_F & TYPE & OY)                 // (G-III)
              | (CIR_H & OF1)
              | (READY);
     end              

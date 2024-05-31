@@ -120,6 +120,19 @@ module power_up (
     logic PL19_SHIFT_CMD;
     logic PL20_OUTPUT;
     logic PL20_OUTPUT_SHIFT;
+
+    // Debugging Assists
+    logic T0, T1, T29;
+    logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX;
+    logic CM;
+
+    logic [4:0] DBG_BIT;      // Bit time, 1..29
+    logic [6:0] DBG_WORD;     // Word time, 0..107
+    logic [0:0] DBG_CMD_SD;   // Command S/D bit
+    logic [4:0] DBG_CMD_D;    // Command Destination
+    logic [4:0] DBG_CMD_S;    // Command Source
+    logic [1:0] DBG_CMD_CH;   // Command Characteristics
+    logic [28:0] DBG_CM;      // Command Register (Dynamic)
     
     timer timer_uut (.*, .clk(CLOCK), .tick(tick_ms));
     tape_reader tape_reader_uut (.*, .clk(CLOCK));
@@ -185,11 +198,11 @@ module power_up (
         //output MAG_TAPE_REV;
 
         // Photoelectric Tape Reader I/O
-        PL6_PHOTO1 <= 0;
-        PL6_PHOTO2 <= 0;
-        PL6_PHOTO3 <= 0;
-        PL6_PHOTO4 <= 0;
-        PL6_PHOTO5 <= 0;
+        //PL6_PHOTO1 <= 0;
+        //PL6_PHOTO2 <= 0;
+        //PL6_PHOTO3 <= 0;
+        //PL6_PHOTO4 <= 0;
+        //PL6_PHOTO5 <= 0;
         PHOTO_READER_PERMIT <= 0;
         //output PHOTO_TAPE_FWD;
         //output PHOTO_TAPE_REV;
@@ -244,6 +257,7 @@ module power_up (
         //output PL19_SHIFT_CMD;
         //output PL20_OUTPUT;
         //output PL20_OUTPUT_SHIFT;
+
     end
     
     initial begin
@@ -300,5 +314,28 @@ module power_up (
         repeat (3600) @(posedge tick_ms);
         $finish;
     end
-    
+
+    logic [28:0] DBG_CM_NEXT;
+    always_ff @(posedge CLOCK) begin
+      if (rst) begin
+        DBG_BIT <= 0;
+        DBG_WORD <= 0;
+        DBG_CMD_SD <= 0;
+        DBG_CMD_D <= 0;
+        DBG_CMD_S <= 0;
+        DBG_CMD_CH <= 0;
+        DBG_CM <= 0;
+        DBG_CM_NEXT <= 0;
+      end else begin
+        DBG_BIT <= T29? 1 : DBG_BIT + 1;
+        DBG_WORD <= T0? 0 : T29? DBG_WORD + 1 : DBG_WORD;
+        DBG_CMD_SD <= C1;
+        DBG_CMD_S <= {C6, C5, C4, C3, C2};
+        DBG_CMD_D <= {CV, CU, C9, C8, C7};
+        DBG_CMD_CH <= {CX, CW};
+        DBG_CM_NEXT <= {CM, DBG_CM_NEXT[28:1]};
+        DBG_CM <= T1? DBG_CM_NEXT : DBG_CM;
+      end
+    end
+
 endmodule

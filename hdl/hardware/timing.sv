@@ -45,7 +45,7 @@ module timing (
     output logic TS    // Sign bit time FF, T1
     );
     
-    logic TM;
+    logic TM, TM_in;
     logic TA, TA_s, TA_r;
     logic TB, TB_s, TB_r;
     logic TC, TC_s, TC_r;
@@ -90,6 +90,8 @@ module timing (
     
       TS_s = (T29 & ~(S6 & SV & DS) & C1) | (T29 & ~CE);
       TS_r = TS;
+
+      TM_in = TM;
     end
 
     sr_ff ff_TA ( .clk(CLOCK), .rst(rst), .s(TA_s), .r(TA_r), .q(TA) );
@@ -100,6 +102,6 @@ module timing (
     sr_ff ff_TE ( .clk(CLOCK), .rst(rst), .s(TE_s), .r(TE_r), .q(TE) );
     sr_ff ff_TS ( .clk(CLOCK), .rst(rst), .s(TS_s), .r(TS_r), .q(TS) );
     // Track TM timing. Repeating pattern that encodes the timing pulses.
-    drum_track #(.N(29), .V(29'b0_1101000_1_1100000_01_10000_00000_0)) track_TM ( .clk(CLOCK), .din(TM), .dout(TM) );
+    drum_track #(.N(29), .V(29'b0_1101000_1_1100000_01_10000_00000_0)) track_TM ( .clk(CLOCK), .din(TM_in), .dout(TM) );
 
 endmodule

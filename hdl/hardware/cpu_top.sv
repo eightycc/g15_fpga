@@ -22,7 +22,6 @@
 module cpu_top (
     input logic rst,
     input logic CLOCK,
-    input logic CR,
     
     // Timing
     input logic T0, T1, T2, T13, T21, T28, T29,
@@ -99,15 +98,15 @@ module cpu_top (
     output logic CC,
     output logic CE,
     output logic CF,
-    output logic CJ,
+    //output logic CJ,
     output logic CM,
     output logic CN,
-    output logic RC,
+    //output logic RC,
     output logic TR,
     output logic KEY_MARK,
     
     // Control Switch
-    output logic C1, C7, C8, C9, CU, CV, CW, CX,
+    output logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX,
     output logic D0, D1, D2, D3, D4, D5, DU, DV, DW, DX,
     output logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX,
     output logic DS,
@@ -132,12 +131,12 @@ module cpu_top (
     logic EB32;
 
     // Control Switch
-    logic C3, C5, C6;
     logic D6, D7;
     logic EB29;
 
     // Control Gate            
     logic CI;
+    logic CJ;
     logic CS;
     
     logic CQ;    
@@ -145,6 +144,7 @@ module cpu_top (
     logic IB;
     logic IC;
     logic IS;
+    logic RC;
     logic TR_r;
     logic KEY_RETURN;
 

@@ -175,7 +175,7 @@ module control_gate (
       CG_s =   (DS & S7 & SX & CIR_4);             // next command from AR
 
       CG_r =   (RC & T29)
-             | (W107 & SW_SA & KEY_F)
+             | (W107 & SW_SA & KEY_F)              // Set N = 00
              | (W107 & PWR_ATS)
              | (PWR_OP);
 
@@ -197,7 +197,7 @@ module control_gate (
       CI = ~(  (KEY_RETURN & ~M0)
              | (RC & ~CG & MC_not)                 // Read command from M line
              | (RC & CG & ~AR)                     // Read command from AR
-             | (W107 & SW_SA & KEY_F)              // Block CI
+             | (W107 & SW_SA & KEY_F)              // Block CI, set N = 00
              | (W107 & PWR_ATS) );                 // Block CI
     
       // CJ: True during static portion command during RC cycle

@@ -118,12 +118,8 @@ module io_5_6 (
     end
 
     always_comb begin
-      MAG_TAPE_STOP =   (OC1 & CIR_S & STOP_OB)
-                      | (READY);
-      PL6_PHOTO_TAPE_FWD = OC1 & OC2 & SLOW_IN;
-      TYPE =   (SLOW_OUT & OC1)
-             | (SLOW_OUT & ~OC2);
-    
+      CIR_Q = SLOW_OUT & OG & ~STOP_OB & ~AS;           // (G-III)
+    //CIR_Q = SLOW_OUT & OG;                            // (~G-III)
       CIR_A = ~OD & CIR_Q;
       CIR_C = OG & FAST_OUT & OY;
       CIR_D = OD & CIR_Q;
@@ -134,19 +130,25 @@ module io_5_6 (
               | (OC_r)
               | (CIR_E & FAST_IN)
               | (CIR_E & ~STOP_OB);
-      CIR_L = CIR_M & OS & SIGN_OF;
-      CIR_M = CIR_N & SLOW_OUT & ~OE;
       CIR_N = T1 & OZ;
+      CIR_M = CIR_N & SLOW_OUT & ~OE;
+      CIR_L = CIR_M & OS & SIGN_OF;
       CIR_O = OG & ~TF & IN;
-      CIR_Q = ~AS & OG & SLOW_OUT & STOP_OB;
+      CIR_T = OE & CIR_U & SLOW_OUT;
       CIR_R = CIR_T & CIR_V;
       CIR_S = CIR_E & SLOW;
-      CIR_T = OE & CIR_U & SLOW_OUT;
       CIR_Y =   (CIR_ALPHA & CIR_V)
               | (CIR_C)
               | (CIR_O)
               | (CIR_R);
       CIR_Z = ~OY & FAST_OUT & ~OG & OB3 & TF;
+
+      MAG_TAPE_STOP =   (OC1 & CIR_S & STOP_OB)
+                      | (READY);
+      PL6_PHOTO_TAPE_FWD = OC1 & OC2 & SLOW_IN;
+      TYPE =   (SLOW_OUT & OC1)
+             | (SLOW_OUT & ~OC2);
+    
     end
     
     // ---------------------------------------------------------------------------------
