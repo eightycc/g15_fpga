@@ -46,6 +46,7 @@ module io_3_4 (
     input logic CIR_V,
     input logic CIR_Y,
     input logic CIR_Z,
+    input logic CF,
     input logic CN,
     input logic DIGIT_OF,
     input logic DS,
@@ -73,6 +74,7 @@ module io_3_4 (
     input logic SW_SA,
     input logic T1,
     input logic T2,
+    input logic TE,
     input logic TF,
     input logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
     
@@ -125,8 +127,10 @@ module io_3_4 (
            | (IN5);
     end
 
+    // ---------------------------------------------------------------------------------
+    // OS: I/O word sign, 0(+), 1(-)
+    // ---------------------------------------------------------------------------------
     always_comb begin
-      // OS: I/O word sign, 0(+), 1(-)
       OS_s =   (AUTO & KEY_CIR_S)
              | (T1 & CN & CIR_T & M19)
              | (T1 & CIR_ALPHA & AR)
@@ -136,7 +140,20 @@ module io_3_4 (
       OS_r =   (READY)
              | (CIR_M)
              | (CIR_E & CR_TAB_OB);
+    end
 
+    // ---------------------------------------------------------------------------------
+    // OA1 to OA4:
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+      // CIR_ALPHA: OZ & OE & SLOW_OUT & ~OC1 & ~OC2;
+      // CIR_C: OG & FAST_OUT & OY;
+      // CIR_E: IN & ~OF1 & OF2 & TF;
+      // CIR_O: OG & ~TF & IN;
+      // CIR_R: CIR_T & CIR_V;
+      // CIR_T: OE & CIR_U & SLOW_OUT;
+      // CIR_U: OC1 | OC2;
+      // CIR_V: CR_TAB_OF | WAIT_OF | DIGIT_OF;
       OAx_r =   (READY)
               | (WAIT_OB)
               | (CIR_M)
@@ -148,10 +165,11 @@ module io_3_4 (
               | (CIR_ALPHA & CIR_V & AR)
               | (CIR_O & ~OY & M23)
               | (CIR_C & M23)
-              | (CIR_E & OS & CR_TAB_OB);
+              | (CIR_E & OS & CR_TAB_OB)
+              | (TE & ~CF & OY & AUTO);     // Auto reload marker
 
       OA1_r =   (OAx_r)
-              | (T2 & AUTO & OY)
+              | (T2 & AUTO & OY)            // Auto reload marker
               | (CIR_C & ~M23)
               | (CIR_E & ~OS & CR_TAB_OB)
               | (CIR_E & ~OB4 & OB5)        // OB4 for [DIG]OB
@@ -182,6 +200,9 @@ module io_3_4 (
               | (CIR_E & ~OB1);
     end
 
+    // ---------------------------------------------------------------------------------
+    // OB1 to OB4:
+    // ---------------------------------------------------------------------------------
     always_comb begin                   
       OB1_s =   (CIR_L)
               | (CIR_B)

@@ -118,7 +118,13 @@ module io_1_2 (
     //     output formatting.
     // ---------------------------------------------------------------------------------
     always_comb begin
-
+      // CIR_A: ~OD & CIR_Q
+      // CIR_C: OG & OY & FAST_OUT
+      // CIR_D: OD & CIR_Q
+      // CIR_E: IN & ~OF1 & OF2 & TF
+      // CIR_Q: ~AS & OG & SLOW_OUT & STOP_OB
+      // CIR_S: CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
+      // CIR_U: OC1 | OC2
       CIR_H =   (OY & ~OG & FAST_OUT & ~OB2 & OB4)
               | (OY & ~OG & FAST_OUT & OC1 & ~OC2);
 
@@ -127,27 +133,27 @@ module io_1_2 (
               | (CIR_A)     // Out: CIR_Q (MZ->OF1, OF2->OF3->MZ control) & ~OD
               | (CIR_D);    // Out: CIR_Q (MZ->OF1, OF2->OF3->MZ control) & OD
 
-      OF1_s =   (IN & HC & ~OF2 & ~STOP_OB)   // In:  HC synchronization
-              | (CIR_A & MZ)                  // Out: MZ->OF1
+      OF1_s =   (IN & HC & ~OF2 & ~STOP_OB)        // In:  HC synchronization
+              | (CIR_A & MZ)                       // Out: MZ->OF1
               | (CIR_C & OA4)
               | (CIR_U & STOP_OF & SLOW_OUT & ~OG & M19) // convert STOP to RELOAD (M19 != 0)
               | (CIR_U & CIR_D & M2)
               | (CIR_D & ~OC1 & ~OC2 & M3);
-      OF1_r =   (IN & ~HC)                    // Input HC synchronization
-              | (CIR_A & ~MZ)                 // Output MZ->OF1
+      OF1_r =   (IN & ~HC)                         // Input HC synchronization
+              | (CIR_A & ~MZ)                      // Output MZ->OF1
               | (CIR_H)
               | (CIR_U & CIR_D & ~M2)
               | (CIR_D & ~OC1 & ~OC2 & ~M3)
               | (READY);
                    
       OF2_s =   (READY & SW_SA & KEY_T & CC & T21)
-              | (CIR_J & OF1);                // I/O: OF1->OF2  
+              | (CIR_J & OF1);                     // I/O: OF1->OF2  
       OF2_r =   (READY & T29)
-              | (CIR_J & (OUT | TF) & ~OF1);  // I/O: OF1->OF2
+              | (CIR_J & (OUT | TF) & ~OF1);       // I/O: OF1->OF2
                 
-      OF3_s =   (OA3 & OG & TF & AUTO & OH & OS)    // (G-III)
-      //        (CIR_G & TYPE & OY)                 // (~G-III)
-              | (CIR_S & CR_TAB_OB)                 // SLOW_IN
+      OF3_s =   (OA3 & OG & TF & AUTO & OH & OS)   // (G-III)
+      //        (CIR_G & TYPE & OY)                // (~G-III)
+              | (CIR_S & CR_TAB_OB)                // SLOW_IN
               | (CIR_Q & OF2)
               | (~(DS & S1) & ~OF2 & FAST_IN);
       OF3_r =   (CIR_Q & ~OF2)
@@ -201,6 +207,11 @@ module io_1_2 (
     // OG: Precession control
     // ---------------------------------------------------------------------------------
     always_comb begin
+      // CIR_E: IN & ~OF1 & OF2 & TF
+      // CIR_H: OY & ~OG & FAST_OUT & ~OB2 & OB4
+      // CIR_N: T1 & OZ
+      // CIR_S: CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
+      // CIR_Z: ~OY & ~OG & TF & FAST_OUT & OB3
       OG_s =   (CIR_S & OB5)                       // Slow in digit
              | (CIR_S & WAIT_OB)                   // Slow in wait
              | (CIR_S & TAB_OB)                    // Slow in tab
@@ -228,6 +239,13 @@ module io_1_2 (
     // OY:
     // ---------------------------------------------------------------------------------
     always_comb begin
+      // CIR_E: IN & ~OF1 & OF2 & TF
+      // CIR_F: OE & T0
+      // CIR_H: OY & ~OG & FAST_OUT & ~OB2 & OB4
+      // CIR_S: CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
+      // CIR_U: OC1 | OC2
+      // CIR_W: CIR_U & CIR_F & ~OY & FAST_OUT & ~OB3
+      // CIR_Z: ~OY & ~OG & TF & FAST_OUT & OB3
       OY_s =   (TF & DS & ~CV & C1 & AUTO)         // (G-III)
       //     | (SLOW_OUT & CIR_G & ~HC)            // (~G-III)
              | (SLOW_OUT & T0 & ~OS & ~HC & ~OH & ~OY)  // (G-III)

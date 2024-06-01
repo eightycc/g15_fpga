@@ -102,6 +102,9 @@ module io_11_mz (
       EB23 = M23 & S5 & SX;
     end
     
+    // ---------------------------------------------------------------------------------
+    // AS:
+    // ---------------------------------------------------------------------------------
     always_comb begin
       // AS indicates alphanumeric operation 
       // TYPE = SLOW_OUT & (OC1 | ~OC2)
@@ -116,6 +119,9 @@ module io_11_mz (
       AS_r = READY;
     end
 
+    // ---------------------------------------------------------------------------------
+    // OZ:
+    // ---------------------------------------------------------------------------------
     always_comb begin
       OZ_s = T0;
       // The ~T0 term is added to avoid potential meta-stability during G-15 start-up
@@ -148,19 +154,26 @@ module io_11_mz (
                | (LB & TR & DX & D4);
     end
 
+    // ---------------------------------------------------------------------------------
+    // M23: 
+    // ---------------------------------------------------------------------------------
     always_comb begin
+      // CIR_C: OG & OY & FAST_OUT
       M23_recirc =   (M23)
                    & (SLOW_OUT | ~OG)
                    & (~AS | ~OY | ~OC3 | ~OC4)      // ~(AUTO & OY)
                    & (~D5 | (~DX & TR))
                    & ~MP_CLR_M23;                   // <M23 CLEAR> button
       M23_in =   (M23_recirc)
-               | (DX & D5 & LB)
-               | (IN & OG & OA4 & ~OF3)             // 4-bit precession
-               | (IN & OG & ~OH & OA1 & OF3)        // 1-bit precession
-               | (CIR_C & OA4)
-               | (MZ & OG & ~OY & FAST_OUT)
-               | (TE & OY & ~CF & SLOW_IN & ~OG);   // marker, bit 1 of even words
+               | (D5 & DX & LB)                     // LB->M23
+               | (IN & OG & OA4 & ~OF3)             // 4-bit prec, insert OA4
+               | (IN & OG & ~OH & OA1 & OF3)        // 1-bit prec, insert OA1
+               | (CIR_C & OA4)                      // insert OA4, mag tape out
+               | (MZ & OG & ~OY & FAST_OUT)         // MZ->M23, mag tape out
+// Note: Schematic 3D592 shows signal "SLOW IN (PR2 AUTO)", but condensed schematic
+//  68 and schematic 3D589 show "AUTO" instead. Since this term controls auto-reload
+//  marker insertion, it is assumed that "AUTO" is the correct signal.
+               | (TE & OY & ~CF & AUTO & ~OG);      // marker, bit 1 of even words
     end
 
     sr_ff ff_AS ( .clk(CLOCK), .rst(rst), .s(AS_s), .r(AS_r), .q(AS) );
