@@ -120,15 +120,15 @@ module anc_2 (
     output logic PL2A_47_MAG_TAB,
     output logic PL2A_48_MAG_SPACE,
     // Interlock contacts:
-    input  logic PL2A_52_ILK,      // Ribbon interlock input
-    output logic PL2A_53_ILK,      // Ribbon interlock output
-    input  logic PL2A_54_ILK,      // Space, CR, TAB interlock input
-    output logic PL2A_55_ILK,      // Space, CR, TAB interlock output
-    input  logic PL2A_56_ILK,      // Character interlock input
-    output logic PL2A_57_ILK,      // Character interlock output
-    output logic PL2A_58_SHIFT,    // Shift common contact
+    //input  logic PL2A_53_ILK,      // Ribbon interlock input
+    //output logic PL2A_52_ILK_O,    // Ribbon interlock output
+    input  logic PL2A_55_ILK,      // Space, CR, TAB interlock input
+    output logic PL2A_54_ILK_O,    // Space, CR, TAB interlock output
+    //input  logic PL2A_57_ILK,      // Character interlock input
+    //output logic PL2A_56_ILK_O,    // Character interlock output
+    output logic PL2A_58_SHIFT_O,  // Shift common contact
     input  logic PL2A_59_SHIFT_UP,      // Shift up
-    input  logic PL2A_60_SHIFT_DOWN,    // Shift down
+    //input  logic PL2A_60_SHIFT_DOWN,    // Shift down
 
     // PLM_2A connector to I/O Writer
     // Signals are identified by their IBM contact number
@@ -179,11 +179,11 @@ module anc_2 (
     output logic PL1A_72_KB_SCAN,  // Keyboard contact common scan
 
     input  logic PL1A_48_CNT_CR,     // CR contact
-    input  logic PL1A_49_CNT_SHIFT,  // SHIFT contact
+    //input  logic PL1A_49_CNT_SHIFT,  // SHIFT contact
     input  logic PL1A_46_CNT_TAB,    // TAB contact
     input  logic PL1A_47_CNT_SPACE,  // SPACE contact
     input  logic PL1A_70_CNT_COMMON, // Ribbon cam driven key common contact
-    input  logic PL1A_52_CNT_TAB_FB, // TAB feedback contact
+    //input  logic PL1A_52_CNT_TAB_FB, // TAB feedback contact
     output logic PL1A_45_CTRL_SCAN,  // Control contact common scan
 
     input  logic PL1A_61_SA,         // ENABLE SW-1 SA contact
@@ -199,7 +199,7 @@ module anc_2 (
     logic RY2_LEV2,       RY2_LEV2_e;
     logic RY3_LEV3,       RY3_LEV3_e;
     logic RY4_LEV4,       RY4_LEV4_e;
-    logic RY5_LEV5,       RY5_LEV5_e;
+    logic RY5_LEV5,       RY5_LEV5_e, RY5_LEV5_ar;
 
     logic RY6_ALPHA5,     RY6_ALPHA5_e;     // RY5 & RY1 | ~RY5 & RY6
     logic RY7_ALPHA6,     RY7_ALPHA6_e;     // RY5 & RY2 | ~RY5 & RY7
@@ -220,6 +220,21 @@ module anc_2 (
     logic RY19,           RY19_e;
     logic RY20_XFER,      RY20_XFER_e;
 
+    // ---------------------------------------------------------------------------------
+    // Typewriter base switches.
+    // ---------------------------------------------------------------------------------
+    always_comb begin
+      PL1_11_SA = ~RY10_TYPE & RY12_SA;
+      PL1_30_GO = PL1A_51_GO;
+      PL1_31_NO_GO = PL1A_55_NO_GO;
+      PL1_32_BP = PL1A_53_BP;
+      PL1_28_REWIND = PL1A_64_REWIND;
+      PL1_4_PUNCH = PL1A_59_PUNCH;
+    end
+
+    // ---------------------------------------------------------------------------------
+    // Output writer. G-15->Coupler->Typewriter
+    // ---------------------------------------------------------------------------------
     // Special output shift cases:
     logic SPECIAL_2;  // /
     logic SPECIAL_37; // =
@@ -229,18 +244,24 @@ module anc_2 (
     logic SPECIAL_27; // )
     logic SPECIAL_23; // *
     logic SPECIAL_COMMON;
+    logic SHIFTING_UP, SHIFTING_DOWN;
 
-    // Output writer.
     always_comb begin
-      // Inputs from G-15 are buffered by relays
+      // Inputs from the G-15 are buffered by relays. These relays have a diode/resistor
+      // bypass to slow their release times to ~20ms so that RY9_EXE contacts absorb the
+      // inductive kickback from the typewriter magnets.
       RY1_LEV1_e = RY10_TYPE & PL1_26_LEV1_IN;
       RY2_LEV2_e = RY10_TYPE & PL1_25_LEV2_IN;
       RY3_LEV3_e = RY10_TYPE & PL1_24_LEV3_IN;
       RY4_LEV4_e = RY10_TYPE & PL1_23_LEV4_IN;
-      RY5_LEV5_e = ~RY8_AN & PL1_27_LEV5_IN;        // TODO: get this right!
+      // In alphanumeric mode, LEV5 has an alternate release time of ~10ms.
+      RY5_LEV5_e = RY10_TYPE & PL1_27_LEV5_IN;
+      RY5_LEV5_ar = RY8_AN;
+
       RY8_AN_e = PL1_18_AN;
       RY9_EXC_e = RY10_TYPE & PL1_29_EXC;
       RY10_TYPE_e = PL1_33_TYPE;
+      RY14_UP_e = RY8_AN & PL2A_59_SHIFT_UP;
 
       // Buffer bits 5 and 6 of an alphanumeric character in RY6 and RY7
       RY6_ALPHA5_e =   (RY8_AN & RY1_LEV1 & RY5_LEV5)         // pick for first extraction
@@ -398,6 +419,13 @@ module anc_2 (
                       & (~RY5_LEV5 | ~RY3_LEV3);
       RY11B_INT_e = RY11A_SHIFT;
       PL2A_46_MAG_SHIFT = RY11A_SHIFT;
+      // There is a delay of ~100ms while the typewriter basket moves to the up or down
+      // position. During this time, SHIFTING_UP or SHIFTING_DOWN will cause PL1_17_F_B
+      // to be asserted. The G-15 will follow FB, delaying PL1_29_EXC until the shift
+      // basket is in position.
+      SHIFTING_UP = RY10_TYPE & RY11A_SHIFT & ~RY14_UP;
+      SHIFTING_DOWN = RY10_TYPE & ~RY11A_SHIFT & RY14_UP;
+      PL2A_58_SHIFT_O = 1;
 
       // Special character magnet control.
       if (RY11B_INT) begin
@@ -411,14 +439,13 @@ module anc_2 (
       end
     end
 
-    // -----------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
     // Input writer. Typewriter->Coupler->G-15
-    // -----------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
     logic COMM;
-    logic KEY_PROBE;
-    logic CTL_PROBE;
     logic T1, T2;
-    logic SHIFTING_UP, SHIFTING_DOWN;
+    //logic KEY_PROBE;
+    //logic CTL_PROBE;
     logic LOWER_CASE;
     logic [3:1] ENC_AN_T1;
     logic [4:1] ENC_AN_T2;
@@ -427,7 +454,6 @@ module anc_2 (
     always_comb begin
       RY12_SA_e        = PL1A_61_SA;
       RY13_AN_NOT_SA_e = RY8_AN & ~RY12_SA;
-      RY14_UP_e        = RY8_AN & PL2A_59_SHIFT_UP;
       RY15_SP_e        = ~RY12_SA & PL1A_47_CNT_SPACE;
       RY16_TAB_e       = ~RY12_SA & PL1A_46_CNT_TAB;
       RY17_CR_e        = ~RY12_SA & PL1A_48_CNT_CR;
@@ -436,18 +462,25 @@ module anc_2 (
       RY19_e           = COMM & RY19 | RY18;
       RY20_XFER_e      = RY19;
 
-      // Keyboard scanner and encoder.
+      // Coupler generated 
       T1 = RY18 & ~RY19;
       T2 = ~RY18 & RY19;
-      KEY_PROBE = T1 | T2 | RY12_SA;
-      CTL_PROBE = T1 | T2;
-      SHIFTING_UP = RY10_TYPE & RY11A_SHIFT & ~RY14_UP;
-      SHIFTING_DOWN = RY10_TYPE & ~RY11A_SHIFT & RY14_UP;
+      //KEY_PROBE = T1 | T2 | RY12_SA;
+      //CTL_PROBE = T1 | T2;
+
+      // Typewriter feedback to the G-15. For output this is shift basket motion
+      // delay, for input it prevents spurious decode while contacts settle.
+      PL1_17_F_B = SHIFTING_UP | SHIFTING_DOWN | (~RY10_TYPE & (T1 | T2));
+
+      // The second term (TYPE & SHIFT) occurs because of how the relays are
+      // wired but is ignored because the encoding is conditioned on ~TYPE. 
       LOWER_CASE =   (~RY10_TYPE & (T1 | T2) & ~RY14_UP)
                    | (RY10_TYPE & RY11A_SHIFT);
       // The ANC-2 encoder is a diode matrix, so instead of a case statement
       // we use a series of if statements.
-      PL1A_72_KB_SCAN = KEY_PROBE;
+      PL1A_72_KB_SCAN = T1 | T2 | RY12_SA;
+      PL1A_45_CTRL_SCAN = T1 | T2;
+      PL2A_54_ILK_O = 1;
       ENC_AN_T1 = '0;
       ENC_AN_T2 = '0;
       ENC_HEX = '0;
@@ -662,15 +695,16 @@ module anc_2 (
         if (~RY14_UP) begin       // 9     x00_1001_11001
           ENC_AN_T2[1] = 1;
           ENC_AN_T2[4] = 1;
-        end else begin            // (     x11_1100_11001
+          ENC_HEX[1] = 1;
+          ENC_HEX[4] = 1;
+          ENC_HEX[5] = 1;
+        end else begin            // (     111_1100_xxxxx
           ENC_AN_T1[1] = 1;
           ENC_AN_T1[2] = 1;
+          ENC_AN_T1[3] = 1;
           ENC_AN_T2[3] = 1;
           ENC_AN_T2[4] = 1;
         end
-        ENC_HEX[1] = 1;
-        ENC_HEX[4] = 1;
-        ENC_HEX[5] = 1;
       end
       if (PL1A_33_CNT_133) begin  // , ↑   x11_1011_xxxxx
         ENC_AN_T1[1] = 1;
@@ -691,15 +725,19 @@ module anc_2 (
       end
       if (PL1A_36_CNT_136) begin  // 0 )
         if (~RY14_UP) begin       // 0     x00_0000_10000
-        end else begin            // )     101_1100_10000
+          ENC_HEX[5] = 1;
+        end else begin            // )     101_1100_xxxxx
           ENC_AN_T1[1] = 1;
           ENC_AN_T1[3] = 1;
           ENC_AN_T2[3] = 1;
           ENC_AN_T2[4] = 1;
         end
-        ENC_HEX[5] = 1;
       end
-      if (PL1A_37_CNT_137) begin  // . ?   x01_1011_0x110   ***
+      if (PL1A_37_CNT_137) begin  // . ?   x01_1011_xxxxx
+        ENC_AN_T1[1] = 1;
+        ENC_AN_T2[1] = 1;
+        ENC_AN_T2[2] = 1;
+        ENC_AN_T2[4] = 1;
       end
       if (PL1A_38_CNT_138) begin  // p P   x10_0111_xxxxx
         ENC_AN_T1[2] = 1;
@@ -718,10 +756,18 @@ module anc_2 (
         ENC_HEX[1] = 1;
         ENC_HEX[5] = 1;
       end
-      if (PL1A_41_CNT_141) begin  // / ⚬
-        if (~RY14_UP) begin       // /     x11_0001_xxxxx
-        end else begin            // ⚬     x11_0000_xxxxx
+      if (PL1A_41_CNT_141) begin  // ⚬ /
+        if (~RY14_UP) begin       // ⚬     x11_0000_00101
+          ENC_AN_T1[1] = 1;
+          ENC_AN_T1[2] = 1;
+        end else begin            // /     111_0001_00101
+          ENC_AN_T1[1] = 1;
+          ENC_AN_T1[2] = 1;
+          ENC_AN_T1[3] = 1;
+          ENC_AN_T2[1] = 1;
         end
+        ENC_HEX[1] = 1;
+        ENC_HEX[3] = 1;
       end
       if (PL1A_42_CNT_142) begin  // ∧ ∨   x01_1110_xxxxx
         ENC_AN_T1[1] = 1;
@@ -735,13 +781,13 @@ module anc_2 (
         ENC_AN_T2[4] = 1;
       end
       if (PL1A_44_CNT_144) begin  // * -
-        if (~RY14_UP) begin       // *     110_1100_00001
+        if (~RY14_UP) begin       // -     010_0000_00001
+          ENC_AN_T1[2] = 1;
+        end else begin            // *     110_1100_0000
           ENC_AN_T1[2] = 1;
           ENC_AN_T1[3] = 1;
           ENC_AN_T2[3] = 1;
           ENC_AN_T2[4] = 1;
-        end else begin            // -     010_0000_00001
-          ENC_AN_T1[2] = 1;
         end
         ENC_HEX[1] = 1;
       end
@@ -771,11 +817,21 @@ module anc_2 (
       end
 
       // Level code mux.
-      PL1_13_LEV1_OUT = ~RY13_AN_NOT_SA? ENC_HEX[1] : RY20_XFER? ENC_AN_T2[1] : ENC_AN_T1[1];
-      PL1_14_LEV2_OUT = ~RY13_AN_NOT_SA? ENC_HEX[2] : RY20_XFER? ENC_AN_T2[2] : ENC_AN_T1[2];
-      //PL1_15_LEV3_OUT = 
-      PL1_16_LEV4_OUT = ~RY13_AN_NOT_SA? ENC_HEX[4] : RY20_XFER? ENC_AN_T2[4] : ENC_AN_T1[4];
-      PL1_12_LEV5_OUT = (T1 | T2) & RY13_AN_NOT_SA;
+      PL1_13_LEV1_OUT =   (ENC_AN_T1[1] & RY20_XFER & RY13_AN_NOT_SA)
+                        | (ENC_AN_T2[1] & ~RY20_XFER & RY13_AN_NOT_SA)
+                        | (ENC_HEX[1] & ~RY13_AN_NOT_SA);
+      PL1_14_LEV2_OUT =   (ENC_AN_T1[2] & RY20_XFER & RY13_AN_NOT_SA)
+                        | (ENC_AN_T2[2] & ~RY20_XFER & RY13_AN_NOT_SA)
+                        | (ENC_HEX[2] & ~RY13_AN_NOT_SA);
+      PL1_15_LEV3_OUT =   (ENC_AN_T1[3] & RY20_XFER & RY13_AN_NOT_SA & ~RY10_TYPE)
+                        | (ENC_AN_T2[3] & ~RY20_XFER & RY13_AN_NOT_SA & ~RY10_TYPE)
+                        | (ENC_HEX[3] & ~RY13_AN_NOT_SA & ~RY10_TYPE)
+                        | (PL2A_55_ILK & ~RY12_SA & RY10_TYPE);
+      PL1_16_LEV4_OUT =   ((T1 | T2) & ~RY20_XFER & RY8_AN)
+                        | (ENC_AN_T2[4] & ~RY20_XFER & RY8_AN)
+                        | (ENC_HEX[4] & ~RY8_AN);
+      PL1_12_LEV5_OUT =   ((T1 | T2) & RY13_AN_NOT_SA)
+                        | (ENC_HEX[5] & ~RY13_AN_NOT_SA);
 
       // Function key contacts are wired directly to G-15 logic via PL1
       PL1_2_KEY_CIR_S = PL1A_1_CNT_101;
@@ -792,27 +848,27 @@ module anc_2 (
       PL1_10_KEY_T    = PL1A_18_CNT_118;
     end
 
-    // Relays have a typical 10ms pull-in and pull-out time.
-    relay #(.T1(10), .T2(10)) ry1   (.*, .clk(CLOCK), .pick(RY1_LEV1_e),       .pulled(RY1_LEV1));
-    relay #(.T1(10), .T2(10)) ry2   (.*, .clk(CLOCK), .pick(RY2_LEV2_e),       .pulled(RY2_LEV2));
-    relay #(.T1(10), .T2(10)) ry3   (.*, .clk(CLOCK), .pick(RY3_LEV3_e),       .pulled(RY3_LEV3));
-    relay #(.T1(10), .T2(10)) ry4   (.*, .clk(CLOCK), .pick(RY4_LEV4_e),       .pulled(RY4_LEV4));
-    relay #(.T1(10), .T2(10)) ry5   (.*, .clk(CLOCK), .pick(RY5_LEV5_e),       .pulled(RY5_LEV5));
-    relay #(.T1(10), .T2(10)) ry6   (.*, .clk(CLOCK), .pick(RY6_ALPHA5_e),     .pulled(RY6_ALPHA5));
-    relay #(.T1(10), .T2(10)) ry7   (.*, .clk(CLOCK), .pick(RY7_ALPHA6_e),     .pulled(RY7_ALPHA6));
-    relay #(.T1(10), .T2(10)) ry8   (.*, .clk(CLOCK), .pick(RY8_AN_e),         .pulled(RY8_AN));
-    relay #(.T1(10), .T2(10)) ry9   (.*, .clk(CLOCK), .pick(RY9_EXC_e),        .pulled(RY9_EXC));
-    relay #(.T1(10), .T2(10)) ry10  (.*, .clk(CLOCK), .pick(RY10_TYPE_e),      .pulled(RY10_TYPE));
-    relay #(.T1(10), .T2(10)) ry11a (.*, .clk(CLOCK), .pick(RY11A_SHIFT_e),    .pulled(RY11A_SHIFT));
-    relay #(.T1(15), .T2(10)) ry11b (.*, .clk(CLOCK), .pick(RY11B_INT_e),      .pulled(RY11B_INT));
-    relay #(.T1(10), .T2(10)) ry12  (.*, .clk(CLOCK), .pick(RY12_SA_e),        .pulled(RY12_SA));
-    relay #(.T1(10), .T2(10)) ry13  (.*, .clk(CLOCK), .pick(RY13_AN_NOT_SA_e), .pulled(RY13_AN_NOT_SA));
-    relay #(.T1(10), .T2(10)) ry14  (.*, .clk(CLOCK), .pick(RY14_UP_e),        .pulled(RY14_UP));
-    relay #(.T1(10), .T2(10)) ry15  (.*, .clk(CLOCK), .pick(RY15_SP_e),        .pulled(RY15_SP));
-    relay #(.T1(10), .T2(10)) ry16  (.*, .clk(CLOCK), .pick(RY16_TAB_e),       .pulled(RY16_TAB));
-    relay #(.T1(10), .T2(10)) ry17  (.*, .clk(CLOCK), .pick(RY17_CR_e),        .pulled(RY17_CR));
-    relay #(.T1(10), .T2(10)) ry18  (.*, .clk(CLOCK), .pick(RY18_e),           .pulled(RY18));
-    relay #(.T1(10), .T2(10)) ry19  (.*, .clk(CLOCK), .pick(RY19_e),           .pulled(RY19));
-    relay #(.T1(10), .T2(10)) ry20  (.*, .clk(CLOCK), .pick(RY20_XFER_e),      .pulled(RY20_XFER));
+    // Relays have ~10ms pull-in and release time.
+    relay #(.T1(10), .T2(20)) ry1   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY1_LEV1_e),       .c(RY1_LEV1), .ar(0));
+    relay #(.T1(10), .T2(20)) ry2   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY2_LEV2_e),       .c(RY2_LEV2), .ar(0));
+    relay #(.T1(10), .T2(20)) ry3   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY3_LEV3_e),       .c(RY3_LEV3), .ar(0));
+    relay #(.T1(10), .T2(20)) ry4   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY4_LEV4_e),       .c(RY4_LEV4), .ar(0));
+    relay #(.T1(10), .T2(20), .T3(10)) ry5   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY5_LEV5_e),       .c(RY5_LEV5), .ar(RY5_LEV5_ar));
+    relay #(.T1(10), .T2(10)) ry6   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY6_ALPHA5_e),     .c(RY6_ALPHA5), .ar(0));
+    relay #(.T1(10), .T2(10)) ry7   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY7_ALPHA6_e),     .c(RY7_ALPHA6), .ar(0));
+    relay #(.T1(10), .T2(10)) ry8   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY8_AN_e),         .c(RY8_AN), .ar(0));
+    relay #(.T1(10), .T2(10)) ry9   (.*, .clk(CLOCK), .tick(tick_ms), .e(RY9_EXC_e),        .c(RY9_EXC), .ar(0));
+    relay #(.T1(10), .T2(10)) ry10  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY10_TYPE_e),      .c(RY10_TYPE), .ar(0));
+    relay #(.T1(10), .T2(10)) ry11a (.*, .clk(CLOCK), .tick(tick_ms), .e(RY11A_SHIFT_e),    .c(RY11A_SHIFT), .ar(0));
+    relay #(.T1(15), .T2(10)) ry11b (.*, .clk(CLOCK), .tick(tick_ms), .e(RY11B_INT_e),      .c(RY11B_INT), .ar(0));
+    relay #(.T1(10), .T2(10)) ry12  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY12_SA_e),        .c(RY12_SA), .ar(0));
+    relay #(.T1(10), .T2(10)) ry13  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY13_AN_NOT_SA_e), .c(RY13_AN_NOT_SA), .ar(0));
+    relay #(.T1(10), .T2(10)) ry14  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY14_UP_e),        .c(RY14_UP), .ar(0));
+    relay #(.T1(10), .T2(10)) ry15  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY15_SP_e),        .c(RY15_SP), .ar(0));
+    relay #(.T1(10), .T2(10)) ry16  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY16_TAB_e),       .c(RY16_TAB), .ar(0));
+    relay #(.T1(10), .T2(10)) ry17  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY17_CR_e),        .c(RY17_CR), .ar(0));
+    relay #(.T1(10), .T2(10)) ry18  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY18_e),           .c(RY18), .ar(0));
+    relay #(.T1(10), .T2(20)) ry19  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY19_e),           .c(RY19), .ar(0));
+    relay #(.T1(10), .T2(10)) ry20  (.*, .clk(CLOCK), .tick(tick_ms), .e(RY20_XFER_e),      .c(RY20_XFER), .ar(0));
 
 endmodule

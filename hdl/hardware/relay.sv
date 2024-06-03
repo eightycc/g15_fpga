@@ -16,83 +16,90 @@
 
 // ----------------------------------------------------------------------------
 // Electromechanical Relay with Configurable Operating and Release Times
+//
+// This is a crude model of an electromechanical relay. Pull-in and release
+// times are configurable. An alternate release time is also provided.
 // ----------------------------------------------------------------------------
 `timescale 1ns / 1ps
 
 module relay #(
-    parameter T1 = 20,   // operating time
-    parameter T2 = 10    // release time
+    parameter T1 = 10,   // operating time
+    parameter T2 = 10,   // release time
+    parameter T3 = 20    // alternate release time
     ) (
     input logic clk,
     input logic rst,
-    input logic tick_ms,
-    input logic pick,
-    output logic pulled
+    input logic tick,
+    input logic e,
+    input logic ar,
+    output logic c
     );
     
     // size the counter
-    localparam W = ($clog2(T1) > $clog2(T2))? $clog2(T1) : $clog2(T2);
+    localparam W1 = ($clog2(T1) > $clog2(T2))? $clog2(T1) : $clog2(T2);
+    localparam W  = (W1 > $clog2(T3))? W1 : $clog2(T3);
     logic [W-1:0] ctr, next_ctr;
     
-    enum {OPEN = 0, PULLED = 1, PULLING = 2, OPENING = 3} state_t;
-    logic [3:0] state, next_state;
+    // state machine
+    typedef enum logic [1:0] {OPEN, PULLED, PULLING, OPENING} state_t;
+    state_t state, next_state;
     
     always_ff @(posedge clk) begin
       if (rst) begin
-        ctr <= 0;
-        state <= 0;
-        state[OPEN] <= 1;
+        ctr <= '0;
+        state <= OPEN;
       end else begin
-        state <= next_state;
         ctr <= next_ctr;
+        state <= next_state;
       end
     end
     
     always_comb begin
-      next_state = 4'b0;
-      next_ctr = (tick_ms)? ctr - 1 : ctr;
-      pulled = 0;
+      next_ctr = (tick)? ctr - 1 : ctr;
+      c = 0;
       
-      unique case (1'b1)
-        state[OPEN]: begin
-          if (pick) begin
+      case (state)
+        OPEN: begin
+          if (e) begin
             next_ctr = T1;
-            next_state[PULLING] = 1;
+            next_state = PULLING;
           end else begin
-            next_state[OPEN] = 1;
+            next_state = OPEN;
           end
         end
         
-        state[PULLING]: begin
-          if (~pick) begin
-            next_ctr = 0;
-            next_state[OPEN] = 1;
-          end else if (tick_ms && next_ctr == 0) begin
-            next_state[PULLED] = 1;
+        PULLING: begin
+          if (~e) begin
+            // if e drops before pull-in completes, release immediately
+            //next_ctr = 0;
+            next_state = OPEN;
+          end else if (tick && next_ctr == 0) begin
+            next_state = PULLED;
           end else begin
-            next_state[PULLING] = 1;
+            next_state = PULLING;
           end
         end
         
-        state[PULLED]: begin
-          pulled = 1;
-          if (~pick) begin
-            next_ctr = T2;
-            next_state[OPENING] = 1;
+        PULLED: begin
+          c = 1;
+          if (~e) begin
+            next_ctr = ar? T3 : T2;
+            next_state = OPENING;
           end else begin
-            next_state[PULLED] = 1;
+            next_state = PULLED;
           end
         end
         
-        state[OPENING]: begin
-          pulled = 1;
-          if (pick) begin
-            next_ctr = 0;
-            next_state[PULLED] = 1;
-          end else if (tick_ms && next_ctr == 0) begin
-            next_state[OPEN] = 1;
+        OPENING: begin
+          c = 1;
+          if (e) begin
+            // if e is asserted before release completes, pull-in immediately
+            //next_ctr = 0;
+            next_state = PULLED;
+          end else if (tick && next_ctr == 0) begin
+            next_state = OPEN;
           end else begin
-            next_state[OPENING] = 1;
+            next_state = OPENING;
           end
         end
         
