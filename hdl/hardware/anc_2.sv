@@ -126,6 +126,7 @@ module anc_2 (
     output logic PL2A_54_ILK_O,    // Space, CR, TAB interlock output
     //input  logic PL2A_57_ILK,      // Character interlock input
     //output logic PL2A_56_ILK_O,    // Character interlock output
+    // Shift basket position:
     output logic PL2A_58_SHIFT_O,  // Shift common contact
     input  logic PL2A_59_SHIFT_UP,      // Shift up
     //input  logic PL2A_60_SHIFT_DOWN,    // Shift down

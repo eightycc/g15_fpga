@@ -1,0 +1,7 @@
+{
+    "verilog.linting.verilator.includePath": [
+        "${workspaceFolder}/hdl/hardware",
+        "${workspaceFolder}/hdl/sim"
+    ],
+    "verilog.linting.verilator.arguments": "--timing"
+}
