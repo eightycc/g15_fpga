@@ -53,6 +53,7 @@ module invert_gate_eb (
     output logic FO,
     output logic IB,
     output logic IC,
+    output logic IP,
     output logic IS
 );
 
@@ -60,7 +61,7 @@ module invert_gate_eb (
     logic FE_s, FE_r, FE;
     logic FO_s, FO_r;
     logic IC_s, IC_r;
-    logic IP_s, IP_r, IP;
+    logic IP_s, IP_r;
     logic IS_s, IS_r;
     logic OVFLW;
     logic TR_TVA_from_MQ_IP_PN;

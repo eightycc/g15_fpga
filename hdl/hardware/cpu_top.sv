@@ -99,9 +99,13 @@ module cpu_top (
     output logic CC,
     output logic CE,
     output logic CF,
+    output logic CG,
+    output logic CH,
     //output logic CJ,
     output logic CM,
     output logic CN,
+    output logic CQ,
+    output logic FO,
     //output logic RC,
     output logic TR,
     output logic KEY_MARK,
@@ -111,6 +115,9 @@ module cpu_top (
     output logic D0, D1, D2, D3, D4, D5, DU, DV, DW, DX,
     output logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX,
     output logic DS,
+
+    // Invert Gate EB
+    output logic IP,
 
     // Accessory interface on connectors PL19 and PL20
     input logic PL19_INPUT,
@@ -140,8 +147,6 @@ module cpu_top (
     logic CJ;
     logic CS;
     
-    logic CQ;    
-    logic FO;
     logic IB;
     logic IC;
     logic IS;

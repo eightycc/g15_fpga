@@ -25,6 +25,7 @@ module io_top (
 
     output logic AS,
     output logic OB1, OB2, OB3, OB4, OB5,
+    output logic OC1, OC2, OC3, OC4,
     output logic OH,
     output logic OY,
     output logic READY,
@@ -128,7 +129,7 @@ module io_top (
 
     logic OA1, OA2, OA3, OA4;
     //logic OB2, OB3, OB4, OB5;
-    logic OC1, OC2, OC3, OC4;
+    //logic OC1, OC2, OC3, OC4;
     logic OF1, OF2, OF3;
 
     //logic CIR_ALPHA;   // (11) OE & OZ & SLOW_OUT & ~OC1 & ~OC2

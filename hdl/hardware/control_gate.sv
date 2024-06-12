@@ -91,6 +91,8 @@ module control_gate (
     output logic CC,
     output logic CE,
     output logic CF,
+    output logic CG,
+    output logic CH,
     output logic CI,
     output logic CJ,
     output logic CM,
@@ -124,8 +126,8 @@ module control_gate (
     logic CD;
     logic CE_s, CE_r; 
     logic CF_s, CF_r;
-    logic CG, CG_s, CG_r;
-    logic CH, CH_s, CH_r;
+    logic CG_s, CG_r;
+    logic CH_s, CH_r;
     logic CJ_s, CJ_r;
     logic CK, CK_s, CK_r;
     logic CL, CL_s, CL_r;

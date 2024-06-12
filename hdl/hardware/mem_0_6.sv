@@ -39,6 +39,7 @@ module mem_0_6 (
     input logic TAPE_START,
     input logic TYPE1, TYPE2, TYPE3,
 
+    output logic CD1, CD2, CD3,
     output logic M0, M1, M2, M3,
     output logic EB0,
     output logic EB1,
@@ -51,9 +52,9 @@ module mem_0_6 (
     output logic MC_not
 );
 
-    logic CD1, CD1_s, CD1_r;
-    logic CD2, CD2_s, CD2_r;
-    logic CD3, CD3_s, CD3_r;
+    logic CD1_s, CD1_r;
+    logic CD2_s, CD2_r;
+    logic CD3_s, CD3_r;
 
     logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in;
     logic M4, M5, M6;

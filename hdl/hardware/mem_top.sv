@@ -48,6 +48,8 @@ module mem_top (
     input logic TAPE_START,
     input logic TYPE1, TYPE2, TYPE3,
 
+    output logic CD1, CD2, CD3,
+
     output logic M0, M1, M2, M3, M20,
     
     output logic EB0, EB1, EB2, EB3, EB4, EB5, EB6,

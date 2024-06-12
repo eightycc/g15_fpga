@@ -32,6 +32,36 @@ module g15_top (
     input  logic PWR_AUTO_TAPE_START,
     input  logic PWR_NT,
 
+    // Remote Neon Panel Connector PL-14
+    output logic PL14_1_CQ,
+    output logic PL14_2_C7,
+    output logic PL14_3_C8,
+    output logic PL14_4_C9,
+    output logic PL14_5_CU,
+    output logic PL14_6_CV,
+    output logic PL14_7_CG,
+    output logic PL14_8_C2,
+    output logic PL14_9_C3,
+    output logic PL14_10_C4,
+    output logic PL14_11_C5,
+    output logic PL14_12_C6,
+    output logic PL14_13_CD1,
+    output logic PL14_14_CW,
+    output logic PL14_15_CX,
+    output logic PL14_16_C1,
+    output logic PL14_17_FO,
+    output logic PL14_18_CH,
+    output logic PL14_19_OC1,
+    output logic PL14_20_OC2,
+    output logic PL14_21_READY,
+    output logic PL14_22_OC3,
+    output logic PL14_23_IP,
+    output logic PL14_24_OC4,
+    output logic PL14_28_CD2,
+    output logic PL14_29_CD3,
+    output logic PL14_30_GO,
+    output logic PL14_32_AS,
+
     // IBM I/O Writer Connector PL1 to ANC-2 Alphanumeric Coupler
     output logic PL1_18_AN,         // AS
     output logic PL1_33_TYPE,       // TYPE
@@ -156,9 +186,11 @@ module g15_top (
     logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX;
 
     logic AR;
-    logic CC, CE, CF, CN;
+    logic CC, CE, CF, CG, CH, CN, CQ;
     logic DS;
+    logic FO;
     //logic EB;
+    logic IP;
     logic LB;
     //logic RC;
     logic TR;
@@ -166,6 +198,7 @@ module g15_top (
 
     // Memory
     logic M0, M1, M2, M3, M19, M20, M23, MC_not;
+    logic CD1, CD2, CD3;
 
     // I/O
     logic AS;
@@ -176,6 +209,7 @@ module g15_top (
     logic CIR_ALPHA, CIR_BETA, CIR_EPSILON, CIR_GAMMA, CIR_DELTA;
     logic CIR_V;
     logic OB1, OB2, OB3, OB4, OB5;
+    logic OC1, OC2, OC3, OC4;
     logic OH, OY;
     logic READY;
     logic TAPE_START;
@@ -210,6 +244,37 @@ module g15_top (
     logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5;
     logic PHOTO_TAPE_FWD;
     logic PHOTO_TAPE_REV;
+
+    always_comb begin
+      PL14_1_CQ = CQ;
+      PL14_2_C7 = C7;
+      PL14_3_C8 = C8;
+      PL14_4_C9 = C9;
+      PL14_5_CU = CU;
+      PL14_6_CV = CV;
+      PL14_7_CG = CG;
+      PL14_8_C2 = C2;
+      PL14_9_C3 = C3;
+      PL14_10_C4 = C4;
+      PL14_11_C5 = C5;
+      PL14_12_C6 = C6;
+      PL14_13_CD1 = CD1;
+      PL14_14_CW = CW;
+      PL14_15_CX = CX;
+      PL14_16_C1 = C1;
+      PL14_17_FO = FO;
+      PL14_18_CH = CH;
+      PL14_19_OC1 = OC1;
+      PL14_20_OC2 = OC2;
+      PL14_21_READY = READY;
+      PL14_22_OC3 = OC3;
+      PL14_23_IP = IP;
+      PL14_24_OC4 = OC4;
+      PL14_28_CD2 = CD2;
+      PL14_29_CD3 = CD3;
+      PL14_30_GO = GO;
+      PL14_32_AS = AS;
+    end
 
     always_comb begin
       PL1_18_AN = AS;
