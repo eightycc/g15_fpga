@@ -22,7 +22,7 @@
 module io_8 (
 
     input logic PHOTO_READER_PERMIT,
-    input logic PL6_PHOTO_TAPE_FWD,
+    input logic PHOTO_TAPE_FWD,
     input logic FAST_IN, FAST_OUT,
     input logic SLOW_IN, SLOW_OUT,
     input logic SW_PUNCH,
@@ -47,7 +47,7 @@ module io_8 (
     output logic MAG1_OUT, MAG2_OUT, MAG3_OUT, MAG4_OUT, MAG5_OUT,
     output logic PHOTO_READER_FWD,
     output logic PHOTO_READER_REV,
-    output logic PL6_PHOTO_TAPE_REV,
+    output logic PHOTO_TAPE_REV,
     output logic PUNCH_SIGNAL,
     output logic TYPE_PULSE,
 
@@ -71,9 +71,9 @@ module io_8 (
       PUNCH_SIGNAL =   (SLOW_OUT & OG & SW_PUNCH & OG)
                      | (SLOW_OUT & OG & ~OC1 & OC2);
 
-      PL6_PHOTO_TAPE_REV = FAST_IN & OC2;
-      PHOTO_READER_REV = PL6_PHOTO_TAPE_REV & PHOTO_READER_PERMIT;
-      PHOTO_READER_FWD = PL6_PHOTO_TAPE_FWD & PHOTO_READER_PERMIT;
+      PHOTO_TAPE_REV = FAST_IN & OC2;
+      PHOTO_READER_REV = PHOTO_TAPE_REV & PHOTO_READER_PERMIT;
+      PHOTO_READER_FWD = PHOTO_TAPE_FWD & PHOTO_READER_PERMIT;
 
       TYPE_PULSE = TYPE & ~OD & ~OE & OY & ~OC2;
 

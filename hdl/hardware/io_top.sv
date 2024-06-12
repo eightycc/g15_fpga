@@ -27,11 +27,13 @@ module io_top (
     output logic OB1, OB2, OB3, OB4, OB5,
     output logic OH,
     output logic OY,
+    output logic READY,
 
     // Turn-on Cycle Controls
-    input logic PWR_ATS,
+    input logic PWR_AUTO_TAPE_START,
     input logic PWR_CLEAR,
 
+    // Mantenance Panel Controls
     input logic MP_CLR_M19,
     input logic MP_SET_M19,
     input logic MP_CLR_M23,
@@ -53,7 +55,10 @@ module io_top (
 
     output logic TYPE,
     output logic TYPE_PULSE,
-    output logic READY,
+
+    // Built-in Phototape Reader
+    input logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5,
+    output logic PHOTO_TAPE_FWD, PHOTO_TAPE_REV,
 
     // Card Reader/Punch Interface
     input logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
@@ -70,9 +75,7 @@ module io_top (
     output logic MAG_TAPE_FWD, MAG_TAPE_REV,
 
     // Photoelectric Tape Reader Interface
-    input logic PL6_PHOTO1, PL6_PHOTO2, PL6_PHOTO3, PL6_PHOTO4, PL6_PHOTO5,
     input logic PHOTO_READER_PERMIT,
-    output logic PL6_PHOTO_TAPE_FWD, PL6_PHOTO_TAPE_REV,
     output logic PHOTO_READER_FWD, PHOTO_READER_REV,
 
     // Tape Punch Interface

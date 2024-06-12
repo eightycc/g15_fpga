@@ -22,6 +22,15 @@
 module g15_top (
     input  logic rst,
     input  logic CLOCK,
+    input  logic tick_ms,
+
+    // Turn-on Cycle Controls
+    input  logic PWR_CLEAR,
+    input  logic PWR_NO_CLEAR,
+    input  logic PWR_OP,
+    input  logic PWR_NO_OP,
+    input  logic PWR_AUTO_TAPE_START,
+    input  logic PWR_NT,
 
     // IBM I/O Writer Connector PL1 to ANC-2 Alphanumeric Coupler
     output logic PL1_18_AN,         // AS
@@ -62,31 +71,35 @@ module g15_top (
     input  logic PL1_12_LEV5_OUT,   // LEV5
     input  logic PL1_17_F_B,        // <F-B>
 
+    // Built-in Photoelectric Tape Reader I/O Connector PL6
+    input  logic PL6_1_PHOTO1,
+    input  logic PL6_2_PHOTO2,
+    input  logic PL6_4_PHOTO3,
+    input  logic PL6_5_PHOTO4,
+    input  logic PL6_7_PHOTO5,
+    output logic PL6_9_PHOTO_TAPE_FWD,      // PL6-9  to relay RY-A
+    output logic PL6_10_PHOTO_TAPE_REV,     // PL6-10 to relay RY-B
+    // PL6_11_REMOTE_REWIND connects to  on the typewriter adapter. When
+    // closed, it energizes R4-C, starting the reverse motor and disabling the
+    // REWIND position of SWITCH_1 on the photo reader.
+    output logic PL6_11_REMOTE_REWIND,      // PL6-11 to relay RY-B
+    input  logic PL6_18_WAIT_FOR_TAPE,      // PL6-18 when RY-A or RY-B is energized
+    input  logic PL6_17_TAPE_RUN_SW,        // PL6-17 to punch
+
     // Card Reader/Punch I/O
-    input logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
-    input logic CARD_SIGN,
+    input  logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
+    input  logic CARD_SIGN,
     output logic CARD_READ_PULSE,
     output logic CARD_READ_SIGNAL,
     output logic CARD_PUNCH_PULSE,
     output logic CARD_PUNCH_SIGNAL,
 
     // Magnetic Tape I/O
-    input logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
+    input  logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
     output logic MAG1_OUT, MAG2_OUT, MAG3_OUT, MAG4_OUT, MAG5_OUT, MAG6_OUT,
     output logic MAG_TAPE_STOP,
     output logic MAG_TAPE_FWD,
     output logic MAG_TAPE_REV,
-
-    // Built-in Photoelectric Tape Reader I/O connector PL6
-    input logic PL6_PHOTO1, PL6_PHOTO2, PL6_PHOTO3, PL6_PHOTO4, PL6_PHOTO5,
-    output logic PL6_PHOTO_TAPE_FWD,      // PL6-9  to relay RY-A
-    output logic PL6_PHOTO_TAPE_REV,      // PL6-10 to relay RY-B
-    // PL6_REMOTE_REWIND connects to  on the typewriter adapter. When
-    // closed, it energizes R4-C, starting the reverse motor and disabling the
-    // REWIND position of SWITCH_1 on the photo reader.
-    //output logic PL6_REMOTE_REWIND,       // PLM6-11 to relay RY-B
-    //input logic PL6_WAIT_FOR_TAPE,        // PL6-18 when RY-A or RY-B is energized
-    //input logic PL6_TAPE_RUN_SW,          // PL6-17 to punch
 
     // Additional Photoelectric Tape Reader I/O
     input logic PHOTO_READER_PERMIT,
@@ -105,14 +118,6 @@ module g15_top (
     input logic MP_CLR_NT,
     input logic MP_SET_OP,
     input logic MP_SET_NT,
-
-    // Turn-on Cycle Controls
-    input logic PWR_CLEAR,
-    input logic PWR_NO_CLEAR,
-    input logic PWR_OP,
-    input logic PWR_NO_OP,
-    input logic PWR_ATS,
-    input logic PWR_NT,
 
     // Card Adapter
     input logic CRP_CQ_s,
@@ -201,6 +206,11 @@ module g15_top (
     logic KEY_CIR_S;
     logic KEY_T;
 
+    // Built-in Phototape Reader
+    logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5;
+    logic PHOTO_TAPE_FWD;
+    logic PHOTO_TAPE_REV;
+
     always_comb begin
       PL1_18_AN = AS;
       PL1_33_TYPE = TYPE;
@@ -234,6 +244,17 @@ module g15_top (
       TYPE4 = PL1_16_LEV4_OUT;
       TYPE5 = PL1_12_LEV5_OUT;
       KEY_FB = PL1_17_F_B;
+    end
+
+    always_comb begin
+      PHOTO1 = PL6_1_PHOTO1;
+      PHOTO2 = PL6_2_PHOTO2;
+      PHOTO3 = PL6_4_PHOTO3;
+      PHOTO4 = PL6_5_PHOTO4;
+      PHOTO5 = PL6_7_PHOTO5;
+      PL6_9_PHOTO_TAPE_FWD = PHOTO_TAPE_FWD;
+      PL6_10_PHOTO_TAPE_REV = PHOTO_TAPE_REV;
+      PL6_11_REMOTE_REWIND = SW_REWIND;
     end
 
     timing timing_inst (.*);

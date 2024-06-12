@@ -51,6 +51,14 @@ module power_up (
     logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5;
     logic TYPE_PULSE;
 
+    // Built-in Phototape Reader
+    logic PL6_1_PHOTO1, PL6_2_PHOTO2, PL6_4_PHOTO3, PL6_5_PHOTO4, PL6_7_PHOTO5;
+    logic PL6_9_PHOTO_TAPE_FWD;
+    logic PL6_10_PHOTO_TAPE_REV;
+    logic PL6_11_REMOTE_REWIND;
+    logic PL6_18_WAIT_FOR_TAPE;
+    logic PL6_TAPE_RUN_SW;
+
     // Card Reader/Punch I/O
     logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5;
     logic CARD_SIGN;
@@ -67,15 +75,9 @@ module power_up (
     logic MAG_TAPE_REV;
 
     // Photoelectric Tape Reader I/O
-    logic PL6_PHOTO1, PL6_PHOTO2, PL6_PHOTO3, PL6_PHOTO4, PL6_PHOTO5;
     logic PHOTO_READER_PERMIT;
-    logic PL6_PHOTO_TAPE_FWD;
-    logic PL6_PHOTO_TAPE_REV;
     logic PHOTO_READER_FWD;
     logic PHOTO_READER_REV;
-    logic PL6_REMOTE_REWIND;
-    logic PL6_WAIT_FOR_TAPE;
-    logic PL6_TAPE_RUN_SW;
     logic SW1_REWIND;
     logic SW1_FORWARD;
     logic SW2;
@@ -98,7 +100,7 @@ module power_up (
     logic PWR_NO_CLEAR;
     logic PWR_OP;
     logic PWR_NO_OP;
-    logic PWR_ATS;
+    logic PWR_AUTO_TAPE_START;
     logic PWR_NT;
 
     // Card Adapter
@@ -198,17 +200,17 @@ module power_up (
         //output MAG_TAPE_REV;
 
         // Photoelectric Tape Reader I/O
-        //PL6_PHOTO1 <= 0;
-        //PL6_PHOTO2 <= 0;
-        //PL6_PHOTO3 <= 0;
-        //PL6_PHOTO4 <= 0;
-        //PL6_PHOTO5 <= 0;
+        //PL6_1_PHOTO1 <= 0;
+        //PL6_2_PHOTO2 <= 0;
+        //PL6_4_PHOTO3 <= 0;
+        //PL6_5_PHOTO4 <= 0;
+        //PL6_7_PHOTO5 <= 0;
         PHOTO_READER_PERMIT <= 0;
         //output PHOTO_TAPE_FWD;
         //output PHOTO_TAPE_REV;
         //output PHOTO_READER_FWD;
         //output PHOTO_READER_REV;
-        PL6_REMOTE_REWIND <= 0;
+        PL6_11_REMOTE_REWIND <= 0;
         SW1_REWIND <= 0;
         SW1_FORWARD <= 0;
         SW2 <= 1;
@@ -235,7 +237,7 @@ module power_up (
         PWR_NO_CLEAR <= 1;
         PWR_OP <= 0;
         PWR_NO_OP <= 1;
-        PWR_ATS <= 0;
+        PWR_AUTO_TAPE_START <= 0;
         PWR_NT <= 0;
 
         // Card Adapter
@@ -287,12 +289,12 @@ module power_up (
         
         // wait 4 revs
         repeat (120) @(posedge tick_ms);
-        PWR_ATS <= 1;
+        PWR_AUTO_TAPE_START <= 1;
         repeat (30) @(posedge tick_ms);
-        PWR_ATS <= 0;
+        PWR_AUTO_TAPE_START <= 0;
         
         // wait for timing track read-in to complete
-        @(negedge PL6_WAIT_FOR_TAPE);
+        @(negedge PL6_18_WAIT_FOR_TAPE);
         // wait an additional 4 revs
         repeat (120) @(posedge tick_ms);
         // raise PWR_NT for 4 revs to xfer M19->number track
@@ -301,12 +303,12 @@ module power_up (
         PWR_NT <= 0;
 
         repeat (120) @(posedge tick_ms);
-        PWR_ATS <= 1;
+        PWR_AUTO_TAPE_START <= 1;
         repeat (30) @(posedge tick_ms);
-        PWR_ATS <= 0;
+        PWR_AUTO_TAPE_START <= 0;
         
         // wait for loader block read-in to complete
-        @(negedge PL6_WAIT_FOR_TAPE);
+        @(negedge PL6_18_WAIT_FOR_TAPE);
 
         repeat (120) @(posedge tick_ms);
         SW_GO <= 1;

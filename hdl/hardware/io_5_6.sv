@@ -48,8 +48,8 @@ module io_5_6 (
     input logic OS,
     input logic OY,
     input logic OZ,
-    input logic PL6_PHOTO_TAPE_REV,
-    input logic PWR_ATS,
+    input logic PHOTO_TAPE_REV,
+    input logic PWR_AUTO_TAPE_START,
     input logic PWR_CLEAR,
     input logic S0,
     input logic SU,
@@ -85,7 +85,7 @@ module io_5_6 (
     //output logic OC3_s, OC4_s,
     //output logic OC_r,
     output logic OUT,
-    output logic PL6_PHOTO_TAPE_FWD,
+    output logic PHOTO_TAPE_FWD,
     output logic READY,
     output logic SLOW_IN,
     output logic SLOW_OUT,
@@ -146,10 +146,10 @@ module io_5_6 (
 
       MAG_TAPE_STOP =   (OC1 & CIR_S & STOP_OB)
                       | (READY);
-      PL6_PHOTO_TAPE_FWD = OC1 & OC2 & SLOW_IN;
+      PHOTO_TAPE_FWD = OC1 & OC2 & SLOW_IN;
       TYPE =   (SLOW_OUT & OC1)
              | (SLOW_OUT & ~OC2);
-      TAPE_START =   (PWR_ATS)                         // Turn-on cycle <AUTO TAPE START>
+      TAPE_START =   (PWR_AUTO_TAPE_START)             // Turn-on cycle <AUTO TAPE START>
                    | (SW_SA & KEY_P & ~AS);            // Key P Start Tape
     
     end
@@ -160,7 +160,7 @@ module io_5_6 (
     always_comb begin
       OC1_s =   (DS & ~CV & C7)                        // I/O op bit 7
               | (TAPE_START)                           // Start phototape reader
-              | (PL6_PHOTO_TAPE_REV & CIR_E & STOP_OB);
+              | (PHOTO_TAPE_REV & CIR_E & STOP_OB);
 
       OC2_s =   (DS & ~CV & C8)                        // I/O op bit 8
               | (TAPE_START)                           // Start phototape reader
@@ -175,7 +175,7 @@ module io_5_6 (
 
       OC4_s =   (DS & ~CV & CU)                        // I/O op bit 10
               | (TAPE_START)                           // Start phototape reader
-              | (PL6_PHOTO_TAPE_REV & CIR_E & STOP_OB & OC1)
+              | (PHOTO_TAPE_REV & CIR_E & STOP_OB & OC1)
               | (SW_SA & KEY_A & CIR_N)                // Key A @(T1&OZ)
               | (SW_SA & KEY_E)                        // Key E Start Type-In, Alpha
               | (SW_SA & KEY_Q);                       // Key Q Start Type-In, Numeric

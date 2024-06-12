@@ -20,19 +20,19 @@
 `timescale 1ns / 1ps
 
 module tape_reader (
-    input logic clk,
-    input logic rst,
+    input  logic clk,
+    input  logic rst,
     
-    input tick_ms,
+    input  tick_ms,
     
-    output logic PL6_PHOTO1, PL6_PHOTO2, PL6_PHOTO3, PL6_PHOTO4, PL6_PHOTO5,
-    input logic PL6_PHOTO_TAPE_FWD,      // PL6-9  to relay RY-A
-    input logic PL6_PHOTO_TAPE_REV,      // PL6-10 to relay RY-B
-    input logic PL6_REMOTE_REWIND,       // connects to SW_REWIND on the typewriter adapter. When
+    output logic PL6_1_PHOTO1, PL6_2_PHOTO2, PL6_4_PHOTO3, PL6_5_PHOTO4, PL6_7_PHOTO5,
+    input  logic PL6_9_PHOTO_TAPE_FWD,      // PL6-9  to relay RY-A
+    input  logic PL6_10_PHOTO_TAPE_REV,     // PL6-10 to relay RY-B
+    input  logic PL6_11_REMOTE_REWIND,      // connects to SW_REWIND on the typewriter adapter. When
     // closed, it energizes R4-C, starting the reverse motor and disabling the
     // REWIND position of SWITCH_1 on the photo reader.
-    output logic PL6_WAIT_FOR_TAPE,        // PL6-18 when RY-A or RY-B is energized
-    output logic PL6_TAPE_RUN_SW,          // PL6-17 to punch
+    output logic PL6_18_WAIT_FOR_TAPE,      // PL6-18 when RY-A or RY-B is energized
+    output logic PL6_TAPE_RUN_SW,           // PL6-17 to punch
     input logic SW1_REWIND,
     input logic SW1_FORWARD,
     input logic SW2
@@ -70,13 +70,13 @@ module tape_reader (
         buf_data <= 0;
         ms_ctr <= 4;
         ms_ctr_running <= 0;
-        PL6_PHOTO1 <= 0;
-        PL6_PHOTO2 <= 0;
-        PL6_PHOTO3 <= 0;
-        PL6_PHOTO4 <= 0;
-        PL6_PHOTO5 <= 0;
+        PL6_1_PHOTO1 <= 0;
+        PL6_2_PHOTO2 <= 0;
+        PL6_4_PHOTO3 <= 0;
+        PL6_5_PHOTO4 <= 0;
+        PL6_7_PHOTO5 <= 0;
       end else begin
-        if (tick_ms & PL6_WAIT_FOR_TAPE & ~ms_ctr_running) begin
+        if (tick_ms & PL6_18_WAIT_FOR_TAPE & ~ms_ctr_running) begin
           // tape moving, read next byte and start clocking it out
           ms_ctr <= 4;
           ms_ctr_running <= 1;
@@ -89,20 +89,20 @@ module tape_reader (
           end else begin
             buf_addr <= (buf_addr == 0)? buf_addr : buf_addr - 1;
           end
-        end else if (tick_ms & PL6_WAIT_FOR_TAPE & ms_ctr_running) begin
+        end else if (tick_ms & PL6_18_WAIT_FOR_TAPE & ms_ctr_running) begin
           // tape is moving, we are clocking out a character
           if (ms_ctr > 1) begin
-            PL6_PHOTO1 <= buf_data[4];
-            PL6_PHOTO2 <= buf_data[3];
-            PL6_PHOTO3 <= buf_data[2];
-            PL6_PHOTO4 <= buf_data[1];
-            PL6_PHOTO5 <= buf_data[0];
+            PL6_1_PHOTO1 <= buf_data[4];
+            PL6_2_PHOTO2 <= buf_data[3];
+            PL6_4_PHOTO3 <= buf_data[2];
+            PL6_5_PHOTO4 <= buf_data[1];
+            PL6_7_PHOTO5 <= buf_data[0];
           end else begin
-            PL6_PHOTO1 <= 0;
-            PL6_PHOTO2 <= 0;
-            PL6_PHOTO3 <= 0;
-            PL6_PHOTO4 <= 0;
-            PL6_PHOTO5 <= 0;
+            PL6_1_PHOTO1 <= 0;
+            PL6_2_PHOTO2 <= 0;
+            PL6_4_PHOTO3 <= 0;
+            PL6_5_PHOTO4 <= 0;
+            PL6_7_PHOTO5 <= 0;
           end
           if (ms_ctr == 0) begin
             // final ms of a character, read next character
@@ -114,13 +114,13 @@ module tape_reader (
             end
           end
           ms_ctr <= (ms_ctr == 0) ? 4 : ms_ctr - 1;
-        end else if (tick_ms & ~PL6_WAIT_FOR_TAPE) begin
+        end else if (tick_ms & ~PL6_18_WAIT_FOR_TAPE) begin
           ms_ctr_running <= 0;
-          PL6_PHOTO1 <= 0;
-          PL6_PHOTO2 <= 0;
-          PL6_PHOTO3 <= 0;
-          PL6_PHOTO4 <= 0;
-          PL6_PHOTO5 <= 0;
+          PL6_1_PHOTO1 <= 0;
+          PL6_2_PHOTO2 <= 0;
+          PL6_4_PHOTO3 <= 0;
+          PL6_5_PHOTO4 <= 0;
+          PL6_7_PHOTO5 <= 0;
         end
       end
     end
@@ -136,13 +136,13 @@ module tape_reader (
     end
     
     always_comb begin
-      ry_a_pick = PL6_PHOTO_TAPE_FWD & ~SW1_REWIND;
-      ry_b_pick = PL6_PHOTO_TAPE_REV & ~SW1_FORWARD;
+      ry_a_pick = PL6_9_PHOTO_TAPE_FWD & ~SW1_REWIND;
+      ry_b_pick = PL6_10_PHOTO_TAPE_REV & ~SW1_FORWARD;
       top_motor_run = ry_a_pulled;
       bot_motor_run = ry_b_pulled;
-      PL6_WAIT_FOR_TAPE = ry_a_pulled | ry_b_pulled;
+      PL6_18_WAIT_FOR_TAPE = ry_a_pulled | ry_b_pulled;
       PL6_TAPE_RUN_SW = SW2;
-      r4_c_pick = PL6_REMOTE_REWIND;
+      r4_c_pick = PL6_11_REMOTE_REWIND;
     end
     
     relay relay_ry_a (.*, .pick(ry_a_pick), .pulled(ry_a_pulled));

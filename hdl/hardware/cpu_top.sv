@@ -60,7 +60,7 @@ module cpu_top (
     input logic PWR_NO_CLEAR,
     input logic PWR_OP,
     input logic PWR_NO_OP,
-    //input logic PWR_ATS,
+    //input logic PWR_AUTO_TAPE_START,
     input logic PWR_NT,
     
     // Punch Card Adapter
