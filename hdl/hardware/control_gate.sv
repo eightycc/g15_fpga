@@ -41,12 +41,11 @@ module control_gate (
     input logic MP_SET_OP,
     input logic MP_SET_NT,
     
-    // Power cycle controls
+    // Turn-on Cycle Controls
     input logic PWR_CLEAR,    // <CLEAR>
     input logic PWR_NO_CLEAR, // <NO_CLEAR>
     input logic PWR_OP,       // <OP>
     input logic PWR_NO_OP,    // <NO_OP>
-    input logic PWR_ATS,      // <AUTO TAPE START>
     input logic PWR_NT,       // <NT>
     
     // Card Adapter
@@ -56,6 +55,7 @@ module control_gate (
     input logic GO,
     
     input logic PL19_READY_IN, PL20_READY_OUT, READY,
+    input logic TAPE_START,
     
     input logic AC_s,
     input logic AR,
@@ -176,7 +176,7 @@ module control_gate (
 
       CG_r =   (RC & T29)
              | (W107 & SW_SA & KEY_F)              // Set N = 00
-             | (W107 & PWR_ATS)
+             | (W107 & TAPE_START)
              | (PWR_OP);
 
       // CQ: Conditional Read Next Command
@@ -191,14 +191,16 @@ module control_gate (
              | (DS & S7 & SU & CIR_4 & READY);     // test I/O section READY
     
       CQ_r =   (T29 & CK & ~CL)                    // reset at end of RC
-             | (PWR_CLEAR);
+             | (PWR_CLEAR)
+             | (W107 & SW_SA & KEY_F)              // Set N = 00
+             | (W107 & TAPE_START);                // phototape start
 
       // CI: Complimented command input
       CI = ~(  (KEY_RETURN & ~M0)
              | (RC & ~CG & MC_not)                 // Read command from M line
              | (RC & CG & ~AR)                     // Read command from AR
              | (W107 & SW_SA & KEY_F)              // Block CI, set N = 00
-             | (W107 & PWR_ATS) );                 // Block CI
+             | (W107 & TAPE_START) );              // Block CI
     
       // CJ: True during static portion command during RC cycle
       //     Gates CK 'start RC' during cycle prior to RC
@@ -256,9 +258,9 @@ module control_gate (
     always_comb begin
       CH_s =   (SW_BP & T21 & RC & CI)    // breakpoint
              | (SW_NO_GO & RC)            // single-cycle
-             | (SW_SA & W107 & KEY_F)     // set N = 00
-             | (PWR_ATS & W107)           // auto tape start
-             | (DS & S4 & SU);                 // HALT
+             | (W107 & SW_SA & KEY_F)     // set N = 00
+             | (W107 & TAPE_START)        // phototape start
+             | (DS & S4 & SU);            // HALT
       CH_r = ~CZ;
     
       CZ_s = ~CZ & (SW_GO | (SW_SA & KEY_I)) & T0;

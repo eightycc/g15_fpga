@@ -106,7 +106,7 @@ module g15_top (
     input logic MP_SET_OP,
     input logic MP_SET_NT,
 
-    // Power cycle controls
+    // Turn-on Cycle Controls
     input logic PWR_CLEAR,
     input logic PWR_NO_CLEAR,
     input logic PWR_OP,
@@ -173,6 +173,7 @@ module g15_top (
     logic OB1, OB2, OB3, OB4, OB5;
     logic OH, OY;
     logic READY;
+    logic TAPE_START;
     logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9;
     logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18, EB19;
     logic EB21, EB22, EB23, EB25, EB26, EB27, EB31;

@@ -89,6 +89,7 @@ module io_5_6 (
     output logic READY,
     output logic SLOW_IN,
     output logic SLOW_OUT,
+    output logic TAPE_START,
     output logic TYPE
 );
     
@@ -148,6 +149,8 @@ module io_5_6 (
       PL6_PHOTO_TAPE_FWD = OC1 & OC2 & SLOW_IN;
       TYPE =   (SLOW_OUT & OC1)
              | (SLOW_OUT & ~OC2);
+      TAPE_START =   (PWR_ATS)                         // Turn-on cycle <AUTO TAPE START>
+                   | (SW_SA & KEY_P & ~AS);            // Key P Start Tape
     
     end
     
@@ -156,28 +159,25 @@ module io_5_6 (
     // ---------------------------------------------------------------------------------
     always_comb begin
       OC1_s =   (DS & ~CV & C7)                        // I/O op bit 7
-              | (PWR_ATS)                              // Init Start Tape Auto
-              | (PL6_PHOTO_TAPE_REV & CIR_E & STOP_OB)
-              | (SW_SA & KEY_P & ~AS);                 // Key P Start Tape
+              | (TAPE_START)                           // Start phototape reader
+              | (PL6_PHOTO_TAPE_REV & CIR_E & STOP_OB);
 
       OC2_s =   (DS & ~CV & C8)                        // I/O op bit 8
-              | (PWR_ATS)                              // Init Start Tape Auto
+              | (TAPE_START)                           // Start phototape reader
               | (SW_SA & KEY_P & ~AS)                  // Key P Start Tape
               | (SW_SA & KEY_B);                       // Key B Start Tape Reverse
 
       OC3_s =   (DS & ~CV & C9)                        // I/O op bit 9
-              | (PWR_ATS)                              // Init Start Tape Auto
+              | (TAPE_START)                           // Start phototape reader
               | (SW_SA & KEY_B)                        // Key B Start Tape Reverse
               | (SW_SA & KEY_E)                        // Key E Start Type-In, Alpha
-              | (SW_SA & KEY_P & ~AS)                  // Key P Start Tape
               | (SW_SA & KEY_Q);                       // Key Q Start Type-In, Numeric
 
       OC4_s =   (DS & ~CV & CU)                        // I/O op bit 10
-              | (PWR_ATS)                              // Init Start Tape Auto
+              | (TAPE_START)                           // Start phototape reader
               | (PL6_PHOTO_TAPE_REV & CIR_E & STOP_OB & OC1)
               | (SW_SA & KEY_A & CIR_N)                // Key A @(T1&OZ)
               | (SW_SA & KEY_E)                        // Key E Start Type-In, Alpha
-              | (SW_SA & KEY_P & ~AS)                  // Key P Start Tape
               | (SW_SA & KEY_Q);                       // Key Q Start Type-In, Numeric
                    
       OC_r =    (FAST_IN & OF3 & ~OC2)                 // Mag. tape search complete

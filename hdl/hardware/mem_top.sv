@@ -40,12 +40,12 @@ module mem_top (
 
     input logic SW_SA,
     input logic KEY_C,
-    input logic PWR_ATS,
 
     input logic CIR_1,
     input logic CIR_2,
     input logic M19, M23,
     input logic READY,
+    input logic TAPE_START,
     input logic TYPE1, TYPE2, TYPE3,
 
     output logic M0, M1, M2, M3, M20,

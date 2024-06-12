@@ -28,7 +28,7 @@ module io_top (
     output logic OH,
     output logic OY,
 
-    // Control Interface
+    // Turn-on Cycle Controls
     input logic PWR_ATS,
     input logic PWR_CLEAR,
 
@@ -96,6 +96,7 @@ module io_top (
     output logic CIR_1, CIR_2, CIR_3, CIR_4,
     output logic CIR_ALPHA, CIR_BETA, CIR_DELTA, CIR_EPSILON, CIR_GAMMA,
     output logic CIR_V,
+    output logic TAPE_START,
 
     // Drum interface
     input logic CN,

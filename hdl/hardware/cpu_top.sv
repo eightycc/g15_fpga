@@ -55,12 +55,12 @@ module cpu_top (
     input logic MP_SET_OP,
     input logic MP_SET_NT,
     
-    // Power Sequencing
+    // Turn-on Cycle Controls
     input logic PWR_CLEAR,
     input logic PWR_NO_CLEAR,
     input logic PWR_OP,
     input logic PWR_NO_OP,
-    input logic PWR_ATS,
+    //input logic PWR_ATS,
     input logic PWR_NT,
     
     // Punch Card Adapter
@@ -81,6 +81,7 @@ module cpu_top (
     input logic CIR_DELTA,
     input logic CIR_V,
     input logic READY,
+    input logic TAPE_START,
     input logic EB19,
     input logic EB23,
     
