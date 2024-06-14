@@ -17,20 +17,20 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Timing Gates (Page 11, 3D596)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module timing (
-    input logic rst,
+    input  logic rst,
     
-    input logic CLOCK, // 9.3uS clock
+    input  logic CLOCK, // 9.3uS clock
     
-    input logic C1,    // Instruction S/D bit (CS)    
-    input logic CE,    // Even word time FF (CG)
-    input logic CF,    // Mod 2 and Mod 3 word time FF (CG)
-    input logic CN,    // Number Track FF (CG)
-    input logic DS,    // Transfer state for special command (CS)
-    input logic S6,
-    input logic SV,
+    input  logic C1,    // Instruction S/D bit (CS)    
+    input  logic CE,    // Even word time FF (CG)
+    input  logic CF,    // Mod 2 and Mod 3 word time FF (CG)
+    input  logic CN,    // Number Track FF (CG)
+    input  logic DS,    // Transfer state for special command (CS)
+    input  logic S6,
+    input  logic SV,
             
     output logic T0,   // Index, T29 of word 107
     output logic T1,

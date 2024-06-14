@@ -17,13 +17,13 @@
 // ----------------------------------------------------------------------------
 // Set-Reset Flip-Flop with Clock-edge Triggering
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module sr_ff (
-    input logic clk,
-    input logic rst,
-    input logic s,
-    input logic r,
+    input  logic clk,
+    input  logic rst,
+    input  logic s,
+    input  logic r,
     output logic q = 1'b0
     );
         

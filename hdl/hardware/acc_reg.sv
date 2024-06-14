@@ -17,35 +17,35 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Accumulator Register and Adder (Page 11, 3D596)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module acc_reg (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
 
-    input logic T1, T29,
+    input  logic T1, T29,
     
-    input logic C3, C8,
-    input logic D7, DU, DV,
-    input logic S6, S7, SU,
+    input  logic C3, C8,
+    input  logic D7, DU, DV,
+    input  logic S6, S7, SU,
 
-    input logic CE,
-    input logic CS,
-    input logic DS,
-    input logic IB,
-    input logic IC,
-    input logic IS,
-    input logic KEY_RETURN,
-    input logic M1,
-    input logic TR,
+    input  logic CE,
+    input  logic CS,
+    input  logic DS,
+    input  logic IB,
+    input  logic IC,
+    input  logic IS,
+    input  logic KEY_RETURN,
+    input  logic M1,
+    input  logic TR,
 
-    input logic CIR_4,
-    input logic CIR_V,
-    input logic CIR_ALPHA,
-    input logic CIR_BETA,
-    input logic CIR_EPSILON,
-    input logic CIR_GAMMA,
-    input logic CIR_DELTA,
+    input  logic CIR_4,
+    input  logic CIR_V,
+    input  logic CIR_ALPHA,
+    input  logic CIR_BETA,
+    input  logic CIR_EPSILON,
+    input  logic CIR_GAMMA,
+    input  logic CIR_DELTA,
     
     output logic AA,
     output logic AC, AC_s,

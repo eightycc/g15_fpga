@@ -15,33 +15,23 @@
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-// Single-shot with configurable duration D in ticks.
+// Bendix G-15 Configuration
 // ----------------------------------------------------------------------------
-`include "g15_config.vh"
+`ifndef _G15_CONFIG_VH_
+`define _G15_CONFIG_VH_ 1
 
-module ss (
-    input  logic clk,
-    input  logic rst,
-    input  logic tick,
-    input  logic t,
-    output logic s
-);
-    parameter D = 10;   // shot duration in ticks
-    localparam W = $clog2(D);
-    logic [W-1:0] ctr, next_ctr;
+`timescale 1ns / 1ps
 
-    always_ff @(posedge clk) begin
-      if (rst) begin
-        ctr <= D;
-      end else begin
-        if (tick) begin
-            ctr <= t? D : next_ctr;
-        end
-      end
-    end
+// G15 ECO Groups, see "G-15 Theory of Operations" page 2-66.
+`define G15_GROUP_I 1
+`define G15_GROUP_II 1
+`define G15_GROUP_III 1
+//`define G15_GROUP_IV 1
+//`define G15_GROUP_V 1
 
-    always_comb begin
-      next_ctr = (ctr == 0)? 0 : ctr - 1;
-      s = (ctr == 0)? 0 : 1;
-    end
-endmodule
+`define G15_MTA_2 1             // Magnetic tape adapter model 2
+`define G15_CA_2 1              // Punched card adapter model 2
+`define G15_PR_1 1              // Additional phototape reader model 1
+`define G15_ANC_2 1             // Typewriter alphanumeric coupler model 2
+
+`endif // _G15_CONFIG_VH_

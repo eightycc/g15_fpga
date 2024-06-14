@@ -17,74 +17,80 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Control Gate 1 & 2 (Page 7, 3D593)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module control_gate (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
     // Typewriter Switches
-    input logic SW_GO,     // <GO>
-    input logic SW_NO_GO,  // <NO_GO>        
-    input logic SW_BP,     // <BP>
-    input logic SW_PUNCH,  // <MANUAL PUN>
-    input logic SW_SA,     // <SA>
+    input  logic SW_GO,     // <GO>
+    input  logic SW_NO_GO,  // <NO_GO>        
+    input  logic SW_BP,     // <BP>
+    input  logic SW_PUNCH,  // <MANUAL PUN>
+    input  logic SW_SA,     // <SA>
     
     // Typewriter Keys
-    input logic KEY_F,     // <F> Set N = 00
-    input logic KEY_I,     // <I> Execute One Command
-    input logic KEY_M,
-    input logic KEY_R,     // <R> Return to Marked Place
+`ifdef G15_GROUP_I
+    input  logic KEY_F,     // <F> Set N = 00
+`endif
+    input  logic KEY_I,     // <I> Execute One Command
+    input  logic KEY_M,
+    input  logic KEY_R,     // <R> Return to Marked Place
     
     // Maintenance Panel Keys
-    input logic MP_CLR_NT,
-    input logic MP_SET_OP,
-    input logic MP_SET_NT,
+    input  logic MP_CLR_NT,
+    input  logic MP_SET_OP,
+    input  logic MP_SET_NT,
     
     // Turn-on Cycle Controls
-    input logic PWR_CLEAR,    // <CLEAR>
-    input logic PWR_NO_CLEAR, // <NO_CLEAR>
-    input logic PWR_OP,       // <OP>
-    input logic PWR_NO_OP,    // <NO_OP>
-    input logic PWR_NT,       // <NT>
+    input  logic PWR_CLEAR,    // <CLEAR>
+    input  logic PWR_NO_CLEAR, // <NO_CLEAR>
+    input  logic PWR_OP,       // <OP>
+    input  logic PWR_NO_OP,    // <NO_OP>
+    input  logic PWR_NT,       // <NT>
     
+`ifdef G15_CA_2
     // Card Adapter
-    input logic CRP_CQ_s,
+    input  logic CRP_CQ_s,
+`endif
     
     // DA-1
-    input logic GO,
+    input  logic GO,
     
-    input logic PL19_READY_IN, PL20_READY_OUT, READY,
-    input logic TAPE_START,
+    input  logic PL19_READY_IN, PL20_READY_OUT, READY,
+`ifdef G15_GROUP_I
+    input  logic TAPE_START,
+`endif
     
-    input logic AC_s,
-    input logic AR,
+    input  logic AC_s,
+    input  logic AR,
     
-    input logic DS,
-    input logic FO,
+    input  logic DS,
+    input  logic FO,
     
-    input logic LB,
-    input logic M0,
-    input logic M19,
-    input logic MC_not,
-    input logic PM,
+    input  logic LB,
+    input  logic M0,
+    input  logic M19,
+    input  logic MC_not,
+    input  logic PM,
     
-    input logic CIR_1, CIR_2, CIR_3, CIR_4,
+    input  logic CIR_1, CIR_2, CIR_3, CIR_4,
     
-    input logic C1,
+    input  logic C1,
     
-    input logic D6, D7, DX,
+    input  logic D6, D7, DX,
     
-    input logic S4, S5, S6, S7, SU, SV, SW, SX,
+    input  logic S4, S5, S6, S7, SU, SV, SW, SX,
     
-    input logic T0,
-    input logic T1,
-    input logic T2,
-    input logic T13,
-    input logic T21,
-    input logic T28,
-    input logic T29,
-    input logic TF,
+    input  logic T0,
+    input  logic T1,
+    input  logic T2,
+    input  logic T13,
+    input  logic T21,
+    input  logic T28,
+    input  logic T29,
+    input  logic TF,
     
     output logic KEY_MARK,
     output logic KEY_RETURN,
@@ -177,32 +183,42 @@ module control_gate (
       CG_s =   (DS & S7 & SX & CIR_4);             // next command from AR
 
       CG_r =   (RC & T29)
+`ifdef G15_GROUP_I
              | (W107 & SW_SA & KEY_F)              // Set N = 00
              | (W107 & TAPE_START)
+`endif
              | (PWR_OP);
 
       // CQ: Conditional Read Next Command
       CQ_s =   (DS & S4 & SV & CIR_1 & SW_PUNCH)   // test manual punch switch
-             | (DS & S5 & SW & CIR_4 & T1 & AR)    // test AR sign
+`ifdef G15_CA_2
+             | (DS & S5 & SW & T1 & AR & CIR_4)    // test AR sign
+             | (CRP_CQ_s)                          // test card read/punch
+`else
+             | (DS & S5 & SW & T1 & AR)            // test AR sign
+`endif
              | (D6 & DX & LB)                      // test LB == 0
              | (DS & S7 & SV & FO)                 // test overflow (FO flip-flop)
-             | (CRP_CQ_s)                          // test card read/punch
              | (DS & S7 & SU & CIR_1 & PL19_READY_IN)   // test accessory READY_IN
              | (DS & S7 & SU & CIR_2 & PL20_READY_OUT)  // test accessory READY_OUT
              | (DS & S7 & SU & CIR_3 & ~GO)        // test DA-1 GO
              | (DS & S7 & SU & CIR_4 & READY);     // test I/O section READY
     
       CQ_r =   (T29 & CK & ~CL)                    // reset at end of RC
-             | (PWR_CLEAR)
+`ifdef G15_GROUP_I
              | (W107 & SW_SA & KEY_F)              // Set N = 00
-             | (W107 & TAPE_START);                // phototape start
+             | (W107 & TAPE_START)                 // phototape start
+`endif
+             | (PWR_CLEAR);
 
       // CI: Complimented command input
-      CI = ~(  (KEY_RETURN & ~M0)
-             | (RC & ~CG & MC_not)                 // Read command from M line
+      CI = ~(  (RC & ~CG & MC_not)                 // Read command from M line
              | (RC & CG & ~AR)                     // Read command from AR
+`ifdef G15_GROUP_I
              | (W107 & SW_SA & KEY_F)              // Block CI, set N = 00
-             | (W107 & TAPE_START) );              // Block CI
+             | (W107 & TAPE_START)                 // Block CI
+`endif
+             | (KEY_RETURN & ~M0) );
     
       // CJ: True during static portion command during RC cycle
       //     Gates CK 'start RC' during cycle prior to RC
@@ -260,8 +276,10 @@ module control_gate (
     always_comb begin
       CH_s =   (SW_BP & T21 & RC & CI)    // breakpoint
              | (SW_NO_GO & RC)            // single-cycle
+`ifdef G15_GROUP_I
              | (W107 & SW_SA & KEY_F)     // set N = 00
              | (W107 & TAPE_START)        // phototape start
+`endif
              | (DS & S4 & SU);            // HALT
       CH_r = ~CZ;
     

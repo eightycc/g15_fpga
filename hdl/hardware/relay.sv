@@ -20,18 +20,18 @@
 // This is a crude model of an electromechanical relay. Pull-in and release
 // times are configurable. An alternate release time is also provided.
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module relay #(
     parameter T1 = 10,   // operating time
     parameter T2 = 10,   // release time
     parameter T3 = 20    // alternate release time
     ) (
-    input logic clk,
-    input logic rst,
-    input logic tick,
-    input logic e,
-    input logic ar,
+    input  logic clk,
+    input  logic rst,
+    input  logic tick,
+    input  logic e,
+    input  logic ar,
     output logic c
     );
     

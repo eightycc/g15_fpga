@@ -17,47 +17,49 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Input Output 5 & 6 (Page 4, 3D590)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module io_5_6 (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
-    input logic AS,
-    input logic AUTO,
-    input logic C7, C8, C9,
-    input logic CIR_ALPHA,
-    input logic CIR_H,
-    input logic CIR_U,
-    input logic CIR_V,
-    input logic CU, CV,
-    input logic DS,
-    input logic KEY_A,
-    input logic KEY_B,
-    input logic KEY_E,
-    input logic KEY_P,
-    input logic KEY_Q,
-    input logic KEY_CIR_S,
-    input logic OA1,
-    input logic OB3,
-    input logic OF1, OF2, OF3,
-    input logic OD,
-    input logic OE,
-    input logic OG,
-    input logic OH,
-    input logic OS,
-    input logic OY,
-    input logic OZ,
-    input logic PHOTO_TAPE_REV,
-    input logic PWR_AUTO_TAPE_START,
-    input logic PWR_CLEAR,
-    input logic S0,
-    input logic SU,
-    input logic SIGN_OF,
-    input logic STOP_OB,
-    input logic SW_SA,
-    input logic T0, T1,
-    input logic TF,
+    input  logic C7, C8, C9,
+    input  logic CIR_ALPHA,
+    input  logic CIR_H,
+    input  logic CIR_U,
+    input  logic CIR_V,
+    input  logic CU, CV,
+    input  logic DS,
+    input  logic KEY_A,
+    input  logic KEY_B,
+    input  logic KEY_P,
+    input  logic KEY_Q,
+    input  logic KEY_CIR_S,
+    input  logic OB3,
+    input  logic OF1, OF2, OF3,
+    input  logic OD,
+    input  logic OE,
+    input  logic OG,
+    input  logic OS,
+    input  logic OY,
+    input  logic OZ,
+    input  logic PHOTO_TAPE_REV,
+    input  logic PWR_AUTO_TAPE_START,
+    input  logic PWR_CLEAR,
+    input  logic S0,
+    input  logic SU,
+    input  logic SIGN_OF,
+    input  logic STOP_OB,
+    input  logic SW_SA,
+    input  logic T0, T1,
+    input  logic TF,
+`ifdef G15_GROUP_III
+    input  logic AS,
+    input  logic AUTO,
+    input  logic KEY_E,
+    input  logic OA1,
+    input  logic OH,
+`endif
     
     output logic CIR_A,
     output logic CIR_C,
@@ -82,8 +84,9 @@ module io_5_6 (
     output logic IN,
     output logic MAG_TAPE_STOP,
     output logic OC1, OC2, OC3, OC4,
-    //output logic OC3_s, OC4_s,
-    //output logic OC_r,
+`ifdef G15_ANC_2
+    output logic OC_r,
+`endif
     output logic OUT,
     output logic PHOTO_TAPE_FWD,
     output logic READY,
@@ -94,7 +97,9 @@ module io_5_6 (
 );
     
     logic OC1_s, OC2_s, OC3_s, OC4_s;
+`ifndef G15_ANC_2
     logic OC_r;
+`endif
     logic SLOW;
     
     // ---------------------------------------------------------------------------------
@@ -119,8 +124,13 @@ module io_5_6 (
     end
 
     always_comb begin
-      CIR_Q = SLOW_OUT & OG & ~STOP_OB & ~AS;           // (G-III)
-    //CIR_Q = SLOW_OUT & OG;                            // (~G-III)
+`ifdef G15_GROUP_I
+      CIR_Q = SLOW_OUT & OG & ~STOP_OB;
+`elsif G15_GROUP_III
+      CIR_Q = SLOW_OUT & OG & ~STOP_OB & ~AS;
+`else
+      CIR_Q = SLOW_OUT & OG;
+`endif
       CIR_A = ~OD & CIR_Q;
       CIR_C = OG & FAST_OUT & OY;
       CIR_D = OD & CIR_Q;
@@ -128,8 +138,16 @@ module io_5_6 (
       CIR_F = OE & T0;
       CIR_G = ~OE & T0;
       CIR_K =   (STOP_OB & SLOW_OUT & OE & OZ)
+`ifdef G15_GROUP_III
+              | (READY)
+`else
               | (OC_r)
-              | (CIR_E & FAST_IN)
+`endif
+`ifdef G15_MTA_2
+              | (FAST_IN & CIR_E)
+`else
+              | (PHOTO_TAPE_REV & STOP_OB & CIR_E)
+`endif
               | (CIR_E & ~STOP_OB);
       CIR_N = T1 & OZ;
       CIR_M = CIR_N & SLOW_OUT & ~OE;
@@ -143,14 +161,21 @@ module io_5_6 (
               | (CIR_O)
               | (CIR_R);
       CIR_Z = ~OY & FAST_OUT & ~OG & OB3 & TF;
-
-      MAG_TAPE_STOP =   (OC1 & CIR_S & STOP_OB)
+`ifdef G15_MTA_2
+      MAG_TAPE_STOP =   (STOP_OB & CIR_S)
+`else
+      MAG_TAPE_STOP =   (STOP_OB & CIR_S & OC1)
+`endif
                       | (READY);
       PHOTO_TAPE_FWD = OC1 & OC2 & SLOW_IN;
       TYPE =   (SLOW_OUT & OC1)
              | (SLOW_OUT & ~OC2);
       TAPE_START =   (PWR_AUTO_TAPE_START)             // Turn-on cycle <AUTO TAPE START>
+`ifdef G15_GROUP_III
                    | (SW_SA & KEY_P & ~AS);            // Key P Start Tape
+`else
+                   | (SW_SA & KEY_P);                  // Key P Start Tape
+`endif
     
     end
     
@@ -164,32 +189,44 @@ module io_5_6 (
 
       OC2_s =   (DS & ~CV & C8)                        // I/O op bit 8
               | (TAPE_START)                           // Start phototape reader
-              | (SW_SA & KEY_P & ~AS)                  // Key P Start Tape
               | (SW_SA & KEY_B);                       // Key B Start Tape Reverse
 
       OC3_s =   (DS & ~CV & C9)                        // I/O op bit 9
               | (TAPE_START)                           // Start phototape reader
               | (SW_SA & KEY_B)                        // Key B Start Tape Reverse
+`ifdef G15_GROUP_III
               | (SW_SA & KEY_E)                        // Key E Start Type-In, Alpha
+`endif
               | (SW_SA & KEY_Q);                       // Key Q Start Type-In, Numeric
 
       OC4_s =   (DS & ~CV & CU)                        // I/O op bit 10
               | (TAPE_START)                           // Start phototape reader
               | (PHOTO_TAPE_REV & CIR_E & STOP_OB & OC1)
               | (SW_SA & KEY_A & CIR_N)                // Key A @(T1&OZ)
+`ifdef G15_GROUP_III
               | (SW_SA & KEY_E)                        // Key E Start Type-In, Alpha
+`endif
               | (SW_SA & KEY_Q);                       // Key Q Start Type-In, Numeric
                    
       OC_r =    (FAST_IN & OF3 & ~OC2)                 // Mag. tape search complete
               | (DS & S0 & SU)                         // I/O op SET READY
-              | (SW_SA & KEY_CIR_S)                        // Key S Stop Tape
+              | (SW_SA & KEY_CIR_S)                    // Key S Stop Tape
               | (PWR_CLEAR)
-              | (CIR_M & OH & ~OA1)
-              | (CIR_F & OH & OF3 & AUTO)
               | (CIR_F & SLOW_OUT & STOP_OB)
-              | (~OD & ~OF2 & SLOW_IN & STOP_OB)
               | (CIR_H & ~OF1 & ~OB3)
-              | (OC1 & OC2 & KEY_CIR_S & ~OH);
+`ifdef G15_GROUP_III
+              | (CIR_M & OH & ~OA1)
+              | (AUTO & OH & OF3 & CIR_F)
+              | (STOP_OB & SLOW_IN & ~OF2 & ~OD)
+    `ifdef G15_ANC_2
+              | (KEY_CIR_S & ~OH);
+    `else
+              | (KEY_CIR_S & ~OC1 & ~OC2 & ~OH);
+    `endif
+`else
+              | (STOP_OB & SLOW_IN & ~OF1 & OE)
+              | (KEY_CIR_S & ~OC1 & ~OC2);
+`endif
     end
     
     sr_ff ff_OC1 ( .clk(CLOCK), .rst(rst), .s(OC1_s), .r(OC_r), .q(OC1) );

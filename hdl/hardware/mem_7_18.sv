@@ -17,23 +17,25 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Memory Lines 7 to 18 (Page 132, 3D297)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module mem_7_18 (
-    //input logic rst,
-    input logic CLOCK,
+    input  logic CLOCK,
 
-    input logic CIR_1,
-    input logic D1, D2, D3, D4, DU, DV, DW, DX,
-    input logic S1, S2, S3, S4, S7, SU, SV, SW, SX,
-    input logic DS,
-    input logic CN,
-    input logic TR,
-    input logic LB,
+    input  logic CIR_1,
+    input  logic D1, D2, D3, D4, DU, DV, DW, DX,
+    input  logic S1, S2, S3, S4, S7, SU, SV, SW, SX,
+    input  logic DS,
+    input  logic CN,
+    input  logic TR,
+    input  logic LB,
 
-    input logic DA1_M17,
-    input logic GO,
+    input  logic DA1_M17,
+    input  logic GO,
 
+`ifdef G15_CA_2
+    output logic M18,
+`endif
     output logic EB7,
     output logic EB8,
     output logic EB9,
@@ -45,13 +47,14 @@ module mem_7_18 (
     output logic EB15,
     output logic EB16,
     output logic EB17,
-    output logic EB18,
-
-    output logic M18
+    output logic EB18
 );
 
     logic M7_in, M8_in, M9_in, M10_in, M11_in, M12_in, M13_in, M14_in, M15_in, M16_in, M17_in, M18_in;
     logic M7, M8, M9, M10, M11, M12, M13, M14, M15, M16, M17;
+`ifndef G15_CA_2
+    logic M18;
+`endif
 
     always_comb begin
       EB7 = M7 & SX & S1;

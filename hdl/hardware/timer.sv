@@ -17,13 +17,13 @@
 // ----------------------------------------------------------------------------
 // Monotonic Timer with Configurable Period
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module timer #(
     parameter D = 108
 ) (
-    input logic clk,
-    input logic rst,
+    input  logic clk,
+    input  logic rst,
     output logic tick
 );
     

@@ -17,7 +17,7 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Top Level Module
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module g15_top (
     input  logic rst,
@@ -60,10 +60,14 @@ module g15_top (
     output logic PL14_28_CD2,
     output logic PL14_29_CD3,
     output logic PL14_30_GO,
+`ifdef G15_GROUP_III
     output logic PL14_32_AS,
+`endif
 
-    // IBM I/O Writer Connector PL1 to ANC-2 Alphanumeric Coupler
+    // IBM I/O Writer Connector PL1 to NC-1, ANC-1, or ANC-2 Typewriter Coupler
+`ifdef G15_GROUP_III
     output logic PL1_18_AN,         // AS
+`endif
     output logic PL1_33_TYPE,       // TYPE
     output logic PL1_29_EXC,        // TYPE_PULSE
     output logic PL1_26_LEV1_IN,    // OB1
@@ -78,8 +82,12 @@ module g15_top (
     input  logic PL1_1_KEY_A,       // <A>
     input  logic PL1_22_KEY_B,      // <B>
     input  logic PL1_21_KEY_C,      // <C>
+`ifdef G15_GROUP_III
     input  logic PL1_20_KEY_E,      // <E>
+`endif
+`ifdef G15_GROUP_I
     input  logic PL1_3_KEY_F,       // <F>
+`endif
     input  logic PL1_5_KEY_I,       // <I>
     input  logic PL1_6_KEY_M,       // <M>
     input  logic PL1_7_KEY_P,       // <P>
@@ -132,35 +140,39 @@ module g15_top (
     output logic MAG_TAPE_REV,
 
     // Additional Photoelectric Tape Reader I/O
-    input logic PHOTO_READER_PERMIT,
+`ifdef G15_PR_1
+    input  logic PHOTO_READER_PERMIT,
+`endif
     output logic PHOTO_READER_FWD,
     output logic PHOTO_READER_REV,
 
     // Tape Punch I/O
-    input logic PUNCHED_TAPE1, PUNCHED_TAPE2, PUNCHED_TAPE3, PUNCHED_TAPE4, PUNCHED_TAPE5,
-    input logic PUNCH_SYNC,
+    input  logic PUNCHED_TAPE1, PUNCHED_TAPE2, PUNCHED_TAPE3, PUNCHED_TAPE4, PUNCHED_TAPE5,
+    input  logic PUNCH_SYNC,
     output logic PUNCH_SIGNAL,
     
     // Maintenance Panel Keys
-    input logic MP_CLR_M19,
-    input logic MP_SET_M19,
-    input logic MP_CLR_M23,
-    input logic MP_CLR_NT,
-    input logic MP_SET_OP,
-    input logic MP_SET_NT,
+    input  logic MP_CLR_M19,
+    input  logic MP_SET_M19,
+    input  logic MP_CLR_M23,
+    input  logic MP_CLR_NT,
+    input  logic MP_SET_OP,
+    input  logic MP_SET_NT,
 
+`ifdef G15_CA_2
     // Card Adapter
-    input logic CRP_CQ_s,
+    input  logic CRP_CQ_s,
+`endif
 
     // DA-1
-    input logic GO,
-    input logic DA1_M17,
-    input logic DA_OVFLW,
+    input  logic GO,
+    input  logic DA1_M17,
+    input  logic DA_OVFLW,
 
     // Accessory interface on connectors PL19 and PL20
-    input logic PL19_INPUT,
-    input logic PL19_READY_IN,
-    input logic PL20_READY_OUT,
+    input  logic PL19_INPUT,
+    input  logic PL19_READY_IN,
+    input  logic PL20_READY_OUT,
     output logic PL19_SHIFT_CMD_M20,
     output logic PL19_WRITE_PULSE,
     output logic PL19_START_INPUT,
@@ -171,10 +183,10 @@ module g15_top (
 
     // Debugging Assists
     //   Timing
-    output T0, T1, T29,
+    output logic T0, T1, T29,
     //   CPU
-    output C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX,
-    output CM
+    output logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX,
+    output logic CM
 );
 
     // Timing
@@ -189,10 +201,8 @@ module g15_top (
     logic CC, CE, CF, CG, CH, CN, CQ;
     logic DS;
     logic FO;
-    //logic EB;
     logic IP;
     logic LB;
-    //logic RC;
     logic TR;
     logic KEY_MARK;
 
@@ -201,7 +211,9 @@ module g15_top (
     logic CD1, CD2, CD3;
 
     // I/O
+`ifdef G15_GROUP_III
     logic AS;
+`endif
     logic TYPE;
     logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5;
     logic TYPE_PULSE;
@@ -210,7 +222,10 @@ module g15_top (
     logic CIR_V;
     logic OB1, OB2, OB3, OB4, OB5;
     logic OC1, OC2, OC3, OC4;
-    logic OH, OY;
+`ifdef G15_GROUP_III
+    logic OH;
+    logic OY;
+`endif
     logic READY;
     logic TAPE_START;
     logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9;
@@ -229,8 +244,12 @@ module g15_top (
     logic KEY_A;
     logic KEY_B;
     logic KEY_C;
+`ifdef G15_GROUP_III
     logic KEY_E;
+`endif
+`ifdef G15_GROUP_I
     logic KEY_F;
+`endif
     logic KEY_FB;
     logic KEY_I;
     logic KEY_M;
@@ -273,24 +292,36 @@ module g15_top (
       PL14_28_CD2 = CD2;
       PL14_29_CD3 = CD3;
       PL14_30_GO = GO;
+`ifdef G15_GROUP_III
       PL14_32_AS = AS;
+`endif
     end
 
     always_comb begin
+`ifdef G15_GROUP_III
       PL1_18_AN = AS;
+`endif
       PL1_33_TYPE = TYPE;
       PL1_29_EXC = TYPE_PULSE;
       PL1_26_LEV1_IN = OB1;
       PL1_25_LEV2_IN = OB2;
       PL1_24_LEV3_IN = OB3;
       PL1_23_LEV4_IN = OB4;
+`ifdef G15_GROUP_III
       PL1_27_LEV5_IN = OB5 & (~AS | ~OY & OH);
+`else
+      PL1_27_LEV5_IN = OB5;
+`endif
       KEY_CIR_S = PL1_2_KEY_CIR_S;
       KEY_A = PL1_1_KEY_A;
       KEY_B = PL1_22_KEY_B;
       KEY_C = PL1_21_KEY_C;
+`ifdef G15_GROUP_III
       KEY_E = PL1_20_KEY_E;
+`endif
+`ifdef G15_GROUP_I
       KEY_F = PL1_3_KEY_F;
+`endif
       KEY_I = PL1_5_KEY_I;
       KEY_M = PL1_6_KEY_M;
       KEY_P = PL1_7_KEY_P;

@@ -17,85 +17,92 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Input Output Section top level module
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module io_top (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
 
+`ifdef G15_GROUP_III
     output logic AS,
-    output logic OB1, OB2, OB3, OB4, OB5,
-    output logic OC1, OC2, OC3, OC4,
+    input  logic C1,
+    input  logic CF,
+    input  logic KEY_E,
     output logic OH,
     output logic OY,
+    input  logic T2,
+    input  logic TE,
+`endif
+    output logic OB1, OB2, OB3, OB4, OB5,
+    output logic OC1, OC2, OC3, OC4,
     output logic READY,
 
     // Turn-on Cycle Controls
-    input logic PWR_AUTO_TAPE_START,
-    input logic PWR_CLEAR,
+    input  logic PWR_AUTO_TAPE_START,
+    input  logic PWR_CLEAR,
 
     // Mantenance Panel Controls
-    input logic MP_CLR_M19,
-    input logic MP_SET_M19,
-    input logic MP_CLR_M23,
+    input  logic MP_CLR_M19,
+    input  logic MP_SET_M19,
+    input  logic MP_CLR_M23,
 
     // Typewriter Interface
-    input logic KEY_A,
-    input logic KEY_B,
-    input logic KEY_E,
-    input logic KEY_FB,
-    input logic KEY_P,
-    input logic KEY_Q,
-    input logic KEY_CIR_S,
-    input logic KEY_T,
+    input  logic KEY_A,
+    input  logic KEY_B,
+    input  logic KEY_FB,
+    input  logic KEY_P,
+    input  logic KEY_Q,
+    input  logic KEY_CIR_S,
+    input  logic KEY_T,
 
-    input logic SW_PUNCH,
-    input logic SW_SA,
+    input  logic SW_PUNCH,
+    input  logic SW_SA,
 
-    input logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
+    input  logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
 
     output logic TYPE,
     output logic TYPE_PULSE,
 
     // Built-in Phototape Reader
-    input logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5,
+    input  logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5,
     output logic PHOTO_TAPE_FWD, PHOTO_TAPE_REV,
 
     // Card Reader/Punch Interface
-    input logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
-    input logic CARD_SIGN,
+    input  logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
+    input  logic CARD_SIGN,
     output logic CARD_READ_PULSE,
     output logic CARD_READ_SIGNAL,
     output logic CARD_PUNCH_PULSE,
     output logic CARD_PUNCH_SIGNAL,
 
     // Magnetic Tape Interface
-    input logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
+    input  logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
     output logic MAG1_OUT, MAG2_OUT, MAG3_OUT, MAG4_OUT, MAG5_OUT, MAG6_OUT,
     output logic MAG_TAPE_STOP,
     output logic MAG_TAPE_FWD, MAG_TAPE_REV,
 
     // Photoelectric Tape Reader Interface
-    input logic PHOTO_READER_PERMIT,
+`ifdef G15_PR_1
+    input  logic PHOTO_READER_PERMIT,
+`endif
     output logic PHOTO_READER_FWD, PHOTO_READER_REV,
 
     // Tape Punch Interface
-    input logic PUNCHED_TAPE1, PUNCHED_TAPE2, PUNCHED_TAPE3, PUNCHED_TAPE4, PUNCHED_TAPE5,
-    input logic PUNCH_SYNC,
+    input  logic PUNCHED_TAPE1, PUNCHED_TAPE2, PUNCHED_TAPE3, PUNCHED_TAPE4, PUNCHED_TAPE5,
+    input  logic PUNCH_SYNC,
     output logic PUNCH_SIGNAL,
 
     // CPU interface
-    input logic AR,
-    input logic C1, C7, C8, C9, CU, CV, CW, CX,
-    input logic D4, D5, DX,
-    input logic S0, S1, S2, S3, S4, S5, S7, SU, SV, SW, SX,
+    input  logic AR,
+    input  logic C7, C8, C9, CU, CV, CW, CX,
+    input  logic D4, D5, DX,
+    input  logic S0, S1, S2, S3, S4, S5, S7, SU, SV, SW, SX,
 
-    input logic LB,
+    input  logic LB,
 
-    input logic CC,
-    input logic CF,
-    input logic DS,
-    input logic TR,
+    input  logic CC,
+    input  logic DS,
+    input  logic TR,
 
     output logic CIR_1, CIR_2, CIR_3, CIR_4,
     output logic CIR_ALPHA, CIR_BETA, CIR_DELTA, CIR_EPSILON, CIR_GAMMA,
@@ -103,34 +110,36 @@ module io_top (
     output logic TAPE_START,
 
     // Drum interface
-    input logic CN,
-    input logic M2, M3,
+    input  logic CN,
+    input  logic M2, M3,
     output logic M19, M23,
     output logic EB19, EB23,
 
-    input logic T0, T1, T2, T21, T29,
-    input logic TE, TF
-
+    input  logic T0, T1, T21, T29,
+    input  logic TF
 );
 
     // I/O section local signals
-    //logic AS;
+`ifdef G15_GROUP_III
     logic AUTO;
+`endif
     logic HC;
     logic OD;
     logic OE;
     logic OG;
-    //logic OH;
-    //logic OY;
+`ifndef G15_GROUP_III
+    logic OY;
+`endif
     logic OS;
     logic OZ;
 
     logic MZ;
 
     logic OA1, OA2, OA3, OA4;
-    //logic OB2, OB3, OB4, OB5;
-    //logic OC1, OC2, OC3, OC4;
     logic OF1, OF2, OF3;
+`ifdef G15_ANC_2
+    logic OC_r;
+`endif
 
     //logic CIR_ALPHA;   // (11) OE & OZ & SLOW_OUT & ~OC1 & ~OC2
     //logic CIR_BETA;    // (11) READY & KEY_T & OF2

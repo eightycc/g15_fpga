@@ -17,44 +17,43 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Inverting Gate and Early Bus (Page 9, 3D393)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module invert_gate_eb (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
 
-    input logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9, 
-    input logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18, EB19,
-    input logic EB21, EB22, EB23, EB25, EB26, EB27, EB28_29, EB29, EB30_31, EB31, EB32,
+    input  logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9, 
+    input  logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18, EB19,
+    input  logic EB21, EB22, EB23, EB25, EB26, EB27, EB28_29, EB29, EB30_31, EB31, EB32,
     
     
-    input logic DA_OVFLW,
+    input  logic DA_OVFLW,
     
-    input logic CW, CX,
-    input logic D6, D7, DV, DW, DX,
-    input logic S6, S7, SV, SW, SX,
+    input  logic CW, CX,
+    input  logic D6, D7, DV, DW, DX,
+    input  logic S6, S7, SV, SW, SX,
     
-    input logic AA,
-    input logic AC,
-    input logic AR,
-    input logic CQ,
-    input logic CS,
-    input logic DS,
-    input logic PA,
-    input logic PC,
-    input logic PG_CLEAR,
-    input logic PP,
-    input logic RC,
-    input logic TR,
-    input logic TS,
-    input logic CIR_X,
+    input  logic AA,
+    input  logic AC,
+    input  logic AR,
+    input  logic CQ,
+    input  logic CS,
+    input  logic DS,
+    input  logic PA,
+    input  logic PC,
+    input  logic PG_CLEAR,
+    input  logic PP,
+    input  logic RC,
+    input  logic TR,
+    input  logic TS,
+    input  logic CIR_X,
 
-    //output logic EB,
-    output logic FO,
-    output logic IB,
-    output logic IC,
-    output logic IP,
-    output logic IS
+    output  logic FO,
+    output  logic IB,
+    output  logic IC,
+    output  logic IP,
+    output  logic IS
 );
 
     logic EB;

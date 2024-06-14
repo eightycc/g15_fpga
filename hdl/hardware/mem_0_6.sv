@@ -17,27 +17,27 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Memory Lines 0 to 6 (Page 12, 3D296)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module mem_0_6 (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
 
-    input logic KEY_MARK,
-    input logic C1, C8, CW, CX,
-    input logic D0, D1, DU, DV, DW, DX,
-    input logic S0, S1, S5, SU, SV, SW, SX,
-    input logic DS,
-    input logic AR,
-    input logic CM,
-    input logic TR,
-    input logic LB,
-    input logic M19, M23,
-    input logic KEY_C,
-    input logic READY,
-    input logic SW_SA,
-    input logic TAPE_START,
-    input logic TYPE1, TYPE2, TYPE3,
+    input  logic KEY_MARK,
+    input  logic C1, C8, CW, CX,
+    input  logic D0, D1, DU, DV, DW, DX,
+    input  logic S0, S1, S5, SU, SV, SW, SX,
+    input  logic DS,
+    input  logic AR,
+    input  logic CM,
+    input  logic TR,
+    input  logic LB,
+    input  logic M19, M23,
+    input  logic KEY_C,
+    input  logic READY,
+    input  logic SW_SA,
+    input  logic TAPE_START,
+    input  logic TYPE1, TYPE2, TYPE3,
 
     output logic CD1, CD2, CD3,
     output logic M0, M1, M2, M3,

@@ -17,36 +17,38 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Memory Lines top level module
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module mem_top (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
 
-    input logic C1, C8, CU, CV, CW, CX,
-    input logic D0, D1, D2, D3, D4, D5, DU, DV, DW, DX,
-    input logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX,
-    input logic DS,
+    input  logic C1, C8, CU, CV, CW, CX,
+    input  logic D0, D1, D2, D3, D4, D5, DU, DV, DW, DX,
+    input  logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX,
+    input  logic DS,
 
-    input logic AR,
-    input logic CN,
-    input logic CM,
-    input logic TR,
-    input logic LB,
-    input logic KEY_MARK,
+    input  logic AR,
+    input  logic CN,
+    input  logic CM,
+    input  logic TR,
+    input  logic LB,
+    input  logic KEY_MARK,
     
-    input logic GO,
-    input logic DA1_M17,
+    input  logic GO,
+    input  logic DA1_M17,
 
-    input logic SW_SA,
-    input logic KEY_C,
+    input  logic SW_SA,
+    input  logic KEY_C,
 
-    input logic CIR_1,
-    input logic CIR_2,
-    input logic M19, M23,
-    input logic READY,
-    input logic TAPE_START,
-    input logic TYPE1, TYPE2, TYPE3,
+    input  logic CIR_1,
+`ifdef G15_CA_2
+    input  logic CIR_2,
+`endif
+    input  logic M19, M23,
+    input  logic READY,
+    input  logic TAPE_START,
+    input  logic TYPE1, TYPE2, TYPE3,
 
     output logic CD1, CD2, CD3,
 
@@ -59,7 +61,9 @@ module mem_top (
     output logic MC_not
 );
 
+`ifdef G15_CA_2
     logic M18;
+`endif
 
     mem_0_6 mem_0_6_inst (.*);
     mem_7_18 mem_7_18_inst (.*);

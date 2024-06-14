@@ -17,12 +17,12 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Magnetic Tape Control (Page 15, 3D597)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module mag_tape_ctrl (
-    input logic CX, CW,
-    input logic DS,
-    input logic S0, S1, S3, S7, SU, SV, SW,
+    input  logic CX, CW,
+    input  logic DS,
+    input  logic S0, S1, S3, S7, SU, SV, SW,
 
     output logic CIR_1,
     output logic CIR_2,

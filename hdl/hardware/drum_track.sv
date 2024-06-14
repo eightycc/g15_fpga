@@ -17,11 +17,11 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Magnetic Drum Track
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module drum_track (
-    input logic clk,
-    input logic din,
+    input  logic clk,
+    input  logic din,
     output logic dout
 );
     

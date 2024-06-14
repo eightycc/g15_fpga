@@ -23,7 +23,7 @@
 // The IBM I/O Writer used by the G-15 is a 44-key model with special Bendix
 // typebars and keytops. 
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module anc_2 (
     input  logic rst,

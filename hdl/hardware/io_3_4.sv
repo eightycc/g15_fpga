@@ -17,66 +17,77 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Input Output 3 & 4 (Page 3, 3D589)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module io_3_4 (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
-    input logic AR,
-    input logic AUTO,
-    input logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
-    input logic CARD_SIGN,
-    input logic CIR_ALPHA,
-    input logic CIR_B,
-    input logic CIR_C,
-    input logic CIR_E,
-    input logic CIR_F,
-    input logic CIR_H,
-    input logic CIR_I,
-    input logic CIR_K,
-    input logic CIR_L,
-    input logic CIR_M,
-    input logic CIR_O,
-    input logic CIR_P,
-    input logic CIR_R,
-    input logic CIR_S,
-    input logic CIR_T,
-    input logic CIR_U,
-    input logic CIR_V,
-    input logic CIR_Y,
-    input logic CIR_Z,
-    input logic CF,
-    input logic CN,
-    input logic DIGIT_OF,
-    input logic DS,
-    input logic FAST_OUT,
-    input logic KEY_CIR_S,
-    input logic KEY_FB,
-    input logic IN,
-    input logic M19,
-    input logic M23,
-    input logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
-    input logic OC2,
-    input logic OD,
-    input logic OE,
-    input logic OF1,
-    input logic OG,
-    input logic OH,
-    input logic OY,
-    input logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5,
-    input logic PUNCHED_TAPE1, PUNCHED_TAPE2, PUNCHED_TAPE3, PUNCHED_TAPE4, PUNCHED_TAPE5,
-    input logic PUNCH_SYNC,
-    input logic READY,
-    input logic S2, SV,
-    input logic SLOW_OUT,
-    input logic SW_PUNCH,
-    input logic SW_SA,
-    input logic T1,
-    input logic T2,
-    input logic TE,
-    input logic TF,
-    input logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
+    input  logic AR,
+`ifdef G15_GROUP_III
+    input  logic AUTO,
+    input  logic CF,
+    input  logic DS,
+    input  logic IN,
+    input  logic KEY_CIR_S,
+    input  logic OG,
+    input  logic OH,
+    input  logic S2, SV,
+    input  logic T2,
+    input  logic TE,
+`endif
+    input  logic CARD_INPUT1, CARD_INPUT2, CARD_INPUT3, CARD_INPUT4, CARD_INPUT5,
+    input  logic CARD_SIGN,
+    input  logic CIR_ALPHA,
+    input  logic CIR_B,
+    input  logic CIR_C,
+    input  logic CIR_E,
+    input  logic CIR_F,
+    input  logic CIR_H,
+    input  logic CIR_I,
+    input  logic CIR_K,
+    input  logic CIR_L,
+    input  logic CIR_M,
+    input  logic CIR_O,
+    input  logic CIR_P,
+    input  logic CIR_R,
+    input  logic CIR_S,
+    input  logic CIR_T,
+    input  logic CIR_U,
+    input  logic CIR_V,
+    input  logic CIR_Y,
+    input  logic CIR_Z,
+    input  logic CN,
+    input  logic DIGIT_OF,
+`ifdef G15_ANC_2
+    input  logic SIGN_OF,
+`endif
+    input  logic FAST_OUT,
+    input  logic KEY_FB,
+    input  logic M19,
+    input  logic M23,
+    input  logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
+    input  logic OC2,
+    input  logic OD,
+    input  logic OE,
+    input  logic OF1,
+`ifndef G15_GROUP_III
+    input  logic OF3,
+`endif
+    input  logic OY,
+    input  logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5,
+    input  logic PUNCHED_TAPE1, PUNCHED_TAPE2, PUNCHED_TAPE3, PUNCHED_TAPE4, PUNCHED_TAPE5,
+    input  logic PUNCH_SYNC,
+    input  logic READY,
+    input  logic SLOW_OUT,
+    input  logic SW_PUNCH,
+    input  logic SW_SA,
+    input  logic T1,
+    input  logic TF,
+`ifndef G15_GROUP_III
+    input  logic TYPE,
+`endif
+    input  logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
     
     output logic CIR_W,
     output logic CR_TAB_OB,
@@ -119,6 +130,9 @@ module io_3_4 (
       IN5 = PUNCHED_TAPE5 | PHOTO5 | TYPE5 | MAG5_IN | CARD_INPUT5;
     
       HC =   (FAST_OUT & OC2 & PUNCH_SYNC)
+`ifndef G15_GROUP_III
+           | (TYPE & ~OC2 & ~OF3)
+`endif
            | (IN1)
            | (IN2)
            | (IN3)
@@ -131,12 +145,21 @@ module io_3_4 (
     // OS: I/O word sign, 0(+), 1(-)
     // ---------------------------------------------------------------------------------
     always_comb begin
-      OS_s =   (AUTO & KEY_CIR_S)
-             | (T1 & CN & CIR_T & M19)
+      OS_s =   (T1 & CN & CIR_T & M19)
              | (T1 & CIR_ALPHA & AR)
              | (CARD_SIGN)
              | (SIGN_OB)
-             | (DS & S2 & SV);
+`ifdef G15_GROUP_III
+             | (KEY_CIR_S & AUTO)
+             | (DS & S2 & SV)
+    `ifdef G15_ANC_2
+             | (T1 & CN & M19 & CIR_T & SIGN_OF);
+    `else
+             | (T1 & CN & M19 & CIR_T);
+    `endif
+`else
+             | (T1 & CN & M19 & CIR_T);
+`endif
       OS_r =   (READY)
              | (CIR_M)
              | (CIR_E & CR_TAB_OB);
@@ -158,24 +181,35 @@ module io_3_4 (
               | (WAIT_OB)
               | (CIR_M)
               | (CIR_H)
-              | (AUTO & OH & TF & OS & ~OG);
+`ifdef G15_GROUP_III
+              | (AUTO & OH & OS & ~OG & TF)
+`endif
+              ;
            
       OA1_s =   (CIR_E & OB4 & OB5)         // OB4 for [DIG]OB 
               | (CIR_R & M19)
               | (CIR_ALPHA & CIR_V & AR)
-              | (CIR_O & ~OY & M23)
               | (CIR_C & M23)
               | (CIR_E & OS & CR_TAB_OB)
-              | (TE & ~CF & OY & AUTO);     // Auto reload marker
+`ifdef G15_GROUP_III
+              | (AUTO & OY & TE & ~CF)      // Auto reload marker
+              | (M23 & CIR_O & ~OY);
+`else
+              | (M23 & CIR_O);
+`endif
 
       OA1_r =   (OAx_r)
-              | (T2 & AUTO & OY)            // Auto reload marker
+`ifdef G15_GROUP_III
+              | (AUTO & OY & T2)            // Auto reload marker
+              | (~M23 & CIR_O & ~OY)
+`else
+              | (~M23 & CIR_O)
+`endif
               | (CIR_C & ~M23)
               | (CIR_E & ~OS & CR_TAB_OB)
               | (CIR_E & ~OB4 & OB5)        // OB4 for [DIG]OB
               | (CIR_R & ~M19)
-              | (CIR_ALPHA & CIR_V & ~AR)
-              | (CIR_O & ~OY & ~M23);
+              | (CIR_ALPHA & CIR_V & ~AR);
     
       OA2_s =   (CIR_Y & OA1)
               | (CIR_Z)
@@ -206,33 +240,53 @@ module io_3_4 (
     always_comb begin                   
       OB1_s =   (CIR_L)
               | (CIR_B)
+`ifdef G15_GROUP_III
               | (IN1 & ((~OS & OF1 & IN) | (~OH & OF1 & IN)))
+`else
+              | (IN1 & OF1)
+`endif
               | (OA4 & CIR_M & DIGIT_OF);
       OB1_r = CIR_K;
     
       OB2_s =   (CIR_I)
               | (HC & FAST_OUT & OC2)
+`ifdef G15_GROUP_III
               | (IN2 & ((~OS & OF1 & IN) | (~OH & OF1 & IN)))
+`else
+              | (IN2 & OF1)
+`endif
               | (OA3 & CIR_M & DIGIT_OF);
       OB2_r =   (CIR_K)
               | (FAST_OUT & OC2 & HC);
                    
       OB3_s =   (CIR_P)
               | (CIR_W)
+`ifdef G15_GROUP_III
               | (IN3 & ((~OS & OF1 & IN) | (~OH & OF1 & IN)))
+`else
+              | (IN3 & OF1)
+`endif
               | (OA2 & CIR_M & DIGIT_OF)
               | (CIR_U & OY & FAST_OUT & M19);
       OB3_r =   (CIR_Z)
               | (CIR_K);
                    
-      OB4_s =   (IN4 & ((~OS & OF1 & IN) | (~OH & OF1 & IN)))
-              | (OA1 & CIR_M & DIGIT_OF)
+      OB4_s =   (OA1 & CIR_M & DIGIT_OF)
+`ifdef G15_GROUP_III
+              | (IN4 & ((~OS & OF1 & IN) | (~OH & OF1 & IN)))
+`else
+              | (IN4 & OF1)
+`endif
               | (FAST_OUT & TF & OB2);
       OB4_r =   (CIR_K)
               | (FAST_OUT & TF & ~OB2);
                    
       OB5_s =   (~OB1 & OB2 & OB3 & ~OB5 & OE & SLOW_OUT & DIGIT_OF)
+`ifdef G15_GROUP_III
               | (IN5 & ((~OS & OF1 & IN) | (~OH & OF1 & IN)))
+`else
+              | (IN5 & OF1)
+`endif
               | (CIR_M & ~OD & DIGIT_OF & (SW_PUNCH | OC2 | OA1 | OA2 | OA3 | OA4));
       OB5_r =   (CIR_E & OB5)
               | (OE & SLOW_OUT & ~DIGIT_OF)

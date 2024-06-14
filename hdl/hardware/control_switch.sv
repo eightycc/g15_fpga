@@ -17,19 +17,19 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Control Switch (Page 8, 3D594)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module control_switch (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
 
-    input logic CIR_2, CIR_3, CIR_4,
-    input logic CI,
-    input logic CJ,
-    input logic M20,
-    input logic PJ,
-    input logic RC,
-    input logic TR,
+    input  logic CIR_2, CIR_3, CIR_4,
+    input  logic CI,
+    input  logic CJ,
+    input  logic M20,
+    input  logic PJ,
+    input  logic RC,
+    input  logic TR,
 
     output logic C1, C2, C3, C4, C5, C6, C7, C8, C9,
     output logic CU, CV, CW, CX,
@@ -41,7 +41,7 @@ module control_switch (
     output logic DS,
 
     // Accessory interface on connectors PL19 and PL20
-    input logic PL19_INPUT,
+    input  logic PL19_INPUT,
     output logic PL19_SHIFT_CMD_M20,
     output logic PL19_WRITE_PULSE,
     output logic PL19_START_INPUT,

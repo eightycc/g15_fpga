@@ -17,30 +17,30 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Product Gates (Page 102, 3D595)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module prod_gate (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
-    input logic T2, T29,
+    input  logic T2, T29,
     
-    input logic CIR_3, CIR_4,
-    input logic C5, C6, C7, C8, CW, CX,
-    input logic D6, D7, DU, DV, DW,
-    input logic S5, S6, SU, SV, SW, SX,
+    input  logic CIR_3, CIR_4,
+    input  logic C5, C6, C7, C8, CW, CX,
+    input  logic D6, D7, DU, DV, DW,
+    input  logic S5, S6, SU, SV, SW, SX,
     
-    input logic CE,
-    input logic CS,
-    input logic DS,
-    input logic IC,
-    input logic IS,
-    input logic TE,
-    input logic TR,
-    input logic TR_r,
+    input  logic CE,
+    input  logic CS,
+    input  logic DS,
+    input  logic IC,
+    input  logic IS,
+    input  logic TE,
+    input  logic TR,
+    input  logic TR_r,
     
-    input logic M2,
-    input logic LB,
+    input  logic M2,
+    input  logic LB,
 
     output logic CIR_X,
     output logic EB28_29,

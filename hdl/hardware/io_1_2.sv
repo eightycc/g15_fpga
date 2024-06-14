@@ -17,67 +17,74 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Input Output 1 & 2 (Page 2, 3D588)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module io_1_2 (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
-    input logic T0, T21, T29,
-    input logic TF,
+    input  logic T21, T29,
+    input  logic TF,
 
-    input logic C1, CV,
-    input logic S0, S1, S2,
+    input  logic S0, S1, S2,
 
-    input logic AS,
-    input logic AUTO,     // (11) AS & SLOW_IN
-    input logic CC,
-    input logic CIR_4,
-    input logic CIR_A,    // (5,6) ~OD & CIR_Q
-    input logic CIR_C,    // (5,6) OG & OY & FAST_OUT
-    input logic CIR_D,    // (5,6) OD & CIR_Q
-    input logic CIR_F,    // (5,6) T0 & OE
-    input logic CIR_G,    // (5,6) T0 & ~OE
-    input logic CIR_M,    // (5,6) CIR_N & SLOW_OUT & ~OE
-    input logic CIR_N,    // (5,6) T1 & OZ
-    input logic CIR_Q,    // (5,6) ~AS & OG & SLOW_OUT & STOP_OB
-    input logic CIR_S,    // (5,6) CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
-    input logic CIR_U,    // (11) OC1 | OC2
-    input logic CIR_W,    // (3,4) CIR_U & CIR_F & ~OY & FAST_OUT & ~OB3
-    input logic CIR_Z,    // (5,6) ~OY & ~OG & TF & FAST_OUT & OB3
-    input logic DS,
-    input logic FAST_IN,
-    input logic FAST_OUT,
-    input logic KEY_A,
-    input logic KEY_E,
-    input logic KEY_FB,   // <F-B> Typewriter feedback
-    input logic KEY_T,
-    input logic HC,
-    input logic IN,
-    input logic M2,
-    input logic M3,
-    input logic M19,
-    input logic M23,
-    input logic MZ,
-    input logic OA1, OA3, OA4,
-    input logic OB2, OB3, OB4, OB5,
-    input logic OC1, OC2, OC4,
-    input logic OUT,
-    input logic OS,
-    input logic READY,
-    input logic SLOW_OUT,
-    input logic STOP_OB,
-    input logic SW_SA,
-    input logic TAB_OB,
-    input logic CR_TAB_OB,
-    input logic TYPE,
-    input logic WAIT_OB,
+`ifdef G15_GROUP_III
+    input  logic AS,
+    input  logic AUTO,     // (11) AS & SLOW_IN
+    input  logic C1, CV,
+    input  logic CIR_4,
+    input  logic CIR_M,    // (5,6) CIR_N & SLOW_OUT & ~OE
+    input  logic KEY_E,
+    input  logic KEY_FB,   // <F-B> Typewriter feedback
+    input  logic M23,
+    input  logic OA1, OA3,
+    input  logic OC4,
+    input  logic OS,
+    input  logic T0,
+`endif
+    input  logic CC,
+    input  logic CIR_A,    // (5,6) ~OD & CIR_Q
+    input  logic CIR_C,    // (5,6) OG & OY & FAST_OUT
+    input  logic CIR_D,    // (5,6) OD & CIR_Q
+    input  logic CIR_F,    // (5,6) T0 & OE
+    input  logic CIR_G,    // (5,6) T0 & ~OE
+    input  logic CIR_N,    // (5,6) T1 & OZ
+    input  logic CIR_Q,    // (5,6) ~AS & OG & SLOW_OUT & STOP_OB
+    input  logic CIR_S,    // (5,6) CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
+    input  logic CIR_U,    // (11) OC1 | OC2
+    input  logic CIR_W,    // (3,4) CIR_U & CIR_F & ~OY & FAST_OUT & ~OB3
+    input  logic CIR_Z,    // (5,6) ~OY & ~OG & TF & FAST_OUT & OB3
+    input  logic DS,
+    input  logic FAST_IN,
+    input  logic FAST_OUT,
+    input  logic KEY_A,
+    input  logic KEY_T,
+    input  logic HC,
+    input  logic IN,
+    input  logic M2,
+    input  logic M3,
+    input  logic M19,
+    input  logic MZ,
+    input  logic OA4,
+    input  logic OB2, OB3, OB4, OB5,
+    input  logic OC1, OC2,
+    input  logic OUT,
+    input  logic READY,
+    input  logic SLOW_OUT,
+    input  logic STOP_OB,
+    input  logic SW_SA,
+    input  logic TAB_OB,
+    input  logic CR_TAB_OB,
+    input  logic TYPE,
+    input  logic WAIT_OB,
     
     output logic CIR_H,
     output logic OD,
     output logic OE,
     output logic OG,
-    output logic OH, //OH_s,
+`ifdef G15_GROUP_III
+    output logic OH,
+`endif
     output logic OY,
     output logic OF1, OF2, OF3,
     output logic DIGIT_OF,
@@ -90,7 +97,9 @@ module io_1_2 (
     logic OD_s, OD_r;
     logic OE_s, OE_r;
     logic OG_s, OG_r;
+`ifdef G15_GROUP_III
     logic OH_s, OH_r;
+`endif
     logic OY_s, OY_r;
     logic OF1_s, OF1_r;
     logic OF2_s, OF2_r;
@@ -151,9 +160,12 @@ module io_1_2 (
       OF2_r =   (READY & T29)
               | (CIR_J & (OUT | TF) & ~OF1);       // I/O: OF1->OF2
                 
-      OF3_s =   (OA3 & OG & TF & AUTO & OH & OS)   // (G-III)
-      //        (CIR_G & TYPE & OY)                // (~G-III)
-              | (CIR_S & CR_TAB_OB)                // SLOW_IN
+      OF3_s =   (CIR_S & CR_TAB_OB)                // SLOW_IN
+`ifdef G15_GROUP_III
+              | (AUTO & OG & TF & OA3 & OH & OS)   // (G-III)
+`else
+              | (TYPE & OY & CIR_G)                // (~G-III)
+`endif
               | (CIR_Q & OF2)
               | (~(DS & S1) & ~OF2 & FAST_IN);
       OF3_r =   (CIR_Q & ~OF2)
@@ -178,14 +190,23 @@ module io_1_2 (
              | (CIR_N & SW_SA & KEY_A)             // @(T1&OZ) Key A(type AR) 
              | (CIR_Z)                             // @TF ~OY & ~OG & FAST_OUT & OB3
              | (CIR_F & RELOAD_OF & SLOW_OUT)      // @(T0&OE) slow out RELOAD
-      //     | (~OB5 & OB3 & ~OB2 & CIR_S)         // @TR slow in (~G-III)
-             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // slow in (G-III)
+`ifdef G15_GROUP_III
+             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // [STOP+RELOAD]OB & CIR_S & ~AS
              | (AUTO & OG & TF & OA3)              // in m23 full 4 bits (G-III)
              | (AUTO & OG & TF & M23)              // in m23 full 1 bit (G-III)
              | (CIR_M & OH & ~OA1);                // @(T1&OZ) slow out (G-III)
+`else
+             | (~OB5 & OB3 & ~OB2 & CIR_S);        // [STOP+RELOAD]OB & CIR_S
+`endif
       OD_r =   (CIR_F & OD)                        // @(T0&OE&OD)
+`ifdef G15_GROUP_III
+    `ifdef G15_ANC_2
              | (~OC4 & ~HC & T0 & OH);             // (ANC-2, G-III)
-      //     | (~OC4 & ~HC & T0 & AS);             // (~ANC-2, G-III)
+    `else
+             | (~OC4 & ~HC & T0 & AS);             // (~ANC-2, G-III)
+    `endif
+`endif
+             ;
     end
 
     // ---------------------------------------------------------------------------------
@@ -194,11 +215,17 @@ module io_1_2 (
     always_comb begin
       // CIR_F: OE & T0  
       // CIR_G: ~OE & T0           
-      OE_s =   (CIR_G & OH & SLOW_OUT)             // @(T0&~OE)
-             | (CIR_G & OY & SLOW_OUT)             // @(T0&~OE)
-      //     | (CIR_G & OD & FAST_OUT)             // @(T0&~OE) (~G-III)
-      //     | (CIR_G & OD & FAST_OUT & ~AS)       // @(T0&~OE) (~ANC-2, G-III)
+      OE_s =   (CIR_G & OY & SLOW_OUT)             // @(T0&~OE)
+`ifdef G15_GROUP_III
+             | (CIR_G & OH & SLOW_OUT)             // @(T0&~OE)
+    `ifdef G15_ANC_2
              | (CIR_G & OD & FAST_OUT & ~OH)       // @(T0&~OE) (ANC-2, G-III)
+    `else
+             | (CIR_G & OD & FAST_OUT & ~AS)       // @(T0&~OE) (~ANC-2, G-III)
+    `endif
+`else
+             | (CIR_G & OD & FAST_OUT)             // @(T0&~OE) (~G-III)
+`endif
              | (CIR_G & OD & IN);
       OE_r = CIR_F;                                // @(T0&OE)
     end
@@ -218,22 +245,27 @@ module io_1_2 (
              | (CIR_N & ~OE & OY & SLOW_OUT)
              | (CIR_Z)
              | (CIR_H)
-             | (~OG & OH & OS & TF & AUTO);        // (G-III)
+`ifdef G15_GROUP_III
+             | (AUTO & OH & OS & ~OG & TF)         // (G-III)
+`endif
+             ;
       OG_r =   ~(   (CIR_S & OB5)
                   | (CIR_S & WAIT_OB)
                   | (CIR_S & TAB_OB) ) & OG & TF;
     end
-    
+
+`ifdef G15_GROUP_III    
     // ---------------------------------------------------------------------------------
     // OH: 
     // ---------------------------------------------------------------------------------
     always_comb begin
-      OH_s =   (IN & CIR_4 & DS & ~CV & C1)        // auto-reload input op, char=0 (G-III)
+      OH_s =   (DS & ~CV & C1 & CIR_4 & IN)        // auto-reload input op, char=0 (G-III)
              | (SW_SA & KEY_E)                     // (G-III)
-             | (OY & T0 & AS & TYPE);              // (G-III)
+             | (TYPE & AS & OY & T0);              // (G-III)
       OH_r =   (READY)                             // (G-III)
-             | (TYPE & T0 & ~OY);                  // (G-III)
+             | (TYPE & ~OY & T0);                  // (G-III)
     end
+`endif
 
     // ---------------------------------------------------------------------------------
     // OY:
@@ -246,20 +278,26 @@ module io_1_2 (
       // CIR_U: OC1 | OC2
       // CIR_W: CIR_U & CIR_F & ~OY & FAST_OUT & ~OB3
       // CIR_Z: ~OY & ~OG & TF & FAST_OUT & OB3
-      OY_s =   (TF & DS & ~CV & C1 & AUTO)         // (G-III)
-      //     | (SLOW_OUT & CIR_G & ~HC)            // (~G-III)
-             | (SLOW_OUT & T0 & ~OS & ~HC & ~OH & ~OY)  // (G-III)
-             | (AUTO & TF & OG & OA3)              // (G-III)
-             | (AUTO & TF & OG & M23)              // (G-III)
-      //     | (CIR_S & ~OB2 & OB3 & ~OB5)         // (~G-III) [STOP + RELOAD]OB
-             | (CIR_S & ~OB2 & OB3 & ~OB5 & ~AS)   // (G-III) [STOP + RELOAD]OB
-             | (CIR_W)
+      OY_s =   (CIR_W)
              | (CIR_Z)
-             | (SW_SA & KEY_E & T0);               // (G-III)
+`ifdef G15_GROUP_III
+             | (DS & ~CV & C1 & AUTO & TF)         // (G-III)
+             | (KEY_E & SW_SA & T0)                // (G-III)
+             | (AUTO & OG & TF & OA3)              // (G-III)
+             | (AUTO & OG & TF & M23)              // (G-III)
+             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // (G-III) [STOP + RELOAD]OB
+             | (SLOW_OUT & ~HC & ~OY & ~OH & ~OS & T0);  // (G-III)
+`else
+             | (~OB5 & OB3 & ~OB2 & CIR_S)         // (~G-III) [STOP + RELOAD]OB
+             | (SLOW_OUT & CIR_G & ~HC);           // (~G-III)
+`endif
       OY_r =   (OY & TF & IN)
+`ifdef G15_GROUP_III
              | (KEY_FB & ~OH & TYPE & AS)          // (G-III)
-      //     | (CIR_F & TYPE)                      // (~G-III)
              | (CIR_F & TYPE & OY)                 // (G-III)
+`else
+             | (CIR_F & TYPE)                      // (~G-III)
+`endif
              | (CIR_H & OF1)
              | (READY);
     end              
@@ -267,7 +305,9 @@ module io_1_2 (
     sr_ff ff_OD ( .clk(CLOCK), .rst(rst), .s(OD_s), .r(OD_r), .q(OD) );
     sr_ff ff_OE ( .clk(CLOCK), .rst(rst), .s(OE_s), .r(OE_r), .q(OE) );
     sr_ff ff_OG ( .clk(CLOCK), .rst(rst), .s(OG_s), .r(OG_r), .q(OG) );
+`ifdef G15_GROUP_III
     sr_ff ff_OH ( .clk(CLOCK), .rst(rst), .s(OH_s), .r(OH_r), .q(OH) );
+`endif
     sr_ff ff_OY ( .clk(CLOCK), .rst(rst), .s(OY_s), .r(OY_r), .q(OY) );
     sr_ff ff_OF1 ( .clk(CLOCK), .rst(rst), .s(OF1_s), .r(OF1_r), .q(OF1) );
     sr_ff ff_OF2 ( .clk(CLOCK), .rst(rst), .s(OF2_s), .r(OF2_r), .q(OF2) );

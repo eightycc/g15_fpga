@@ -17,79 +17,84 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 CPU Top Level Module
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module cpu_top (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
     // Timing
-    input logic T0, T1, T2, T13, T21, T28, T29,
-    input logic TE,
-    input logic TF,
-    input logic TS,
+    input  logic T0, T1, T2, T13, T21, T28, T29,
+    input  logic TE,
+    input  logic TF,
+    input  logic TS,
     
     // Memory
-    input logic M0,
-    input logic M1,
-    input logic M2,
-    input logic M19,
-    input logic M20,
-    input logic MC_not,
+    input  logic M0,
+    input  logic M1,
+    input  logic M2,
+    input  logic M19,
+    input  logic M20,
+    input  logic MC_not,
     
     // Typewriter Switches
-    input logic SW_GO,
-    input logic SW_NO_GO,
-    input logic SW_BP,
-    input logic SW_PUNCH,
-    input logic SW_SA,
+    input  logic SW_GO,
+    input  logic SW_NO_GO,
+    input  logic SW_BP,
+    input  logic SW_PUNCH,
+    input  logic SW_SA,
     
     // Typewriter Keys
-    input logic KEY_F,
-    input logic KEY_I,
-    input logic KEY_M,
-    input logic KEY_R,
+`ifdef G15_GROUP_I
+    input  logic KEY_F,
+`endif
+    input  logic KEY_I,
+    input  logic KEY_M,
+    input  logic KEY_R,
 
     // Maintenance Panel
-    input logic MP_CLR_NT,
-    input logic MP_SET_OP,
-    input logic MP_SET_NT,
+    input  logic MP_CLR_NT,
+    input  logic MP_SET_OP,
+    input  logic MP_SET_NT,
     
     // Turn-on Cycle Controls
-    input logic PWR_CLEAR,
-    input logic PWR_NO_CLEAR,
-    input logic PWR_OP,
-    input logic PWR_NO_OP,
+    input  logic PWR_CLEAR,
+    input  logic PWR_NO_CLEAR,
+    input  logic PWR_OP,
+    input  logic PWR_NO_OP,
     //input logic PWR_AUTO_TAPE_START,
-    input logic PWR_NT,
-    
+    input  logic PWR_NT,
+
+`ifdef G15_CA_2
     // Punch Card Adapter
-    input logic CRP_CQ_s,
+    input  logic CRP_CQ_s,
+`endif
     
     // DA-1
-    input logic GO,
-    input logic DA_OVFLW,
+    input  logic GO,
+    input  logic DA_OVFLW,
     
     // Magnetic Tape Adapter
-    input logic CIR_1, CIR_2, CIR_3, CIR_4,
+    input  logic CIR_1, CIR_2, CIR_3, CIR_4,
     
     // I/O
-    input logic CIR_ALPHA,
-    input logic CIR_BETA,
-    input logic CIR_EPSILON,
-    input logic CIR_GAMMA,
-    input logic CIR_DELTA,
-    input logic CIR_V,
-    input logic READY,
-    input logic TAPE_START,
-    input logic EB19,
-    input logic EB23,
+    input  logic CIR_ALPHA,
+    input  logic CIR_BETA,
+    input  logic CIR_EPSILON,
+    input  logic CIR_GAMMA,
+    input  logic CIR_DELTA,
+    input  logic CIR_V,
+    input  logic READY,
+`ifdef G15_GROUP_I
+    input  logic TAPE_START,
+`endif
+    input  logic EB19,
+    input  logic EB23,
     
     // Memory
-    input logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9,
-    input logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18,
-    input logic EB21, EB22, EB25, EB26, EB27, EB31,
-    //output logic EB,
+    input  logic EB0, EB1, EB2, EB3, EB4, EB5, EB6, EB7, EB8, EB9,
+    input  logic EB10, EB11, EB12, EB13, EB14, EB15, EB16, EB17, EB18,
+    input  logic EB21, EB22, EB25, EB26, EB27, EB31,
 
     // Accumulator Register
     output logic AR,
@@ -120,9 +125,9 @@ module cpu_top (
     output logic IP,
 
     // Accessory interface on connectors PL19 and PL20
-    input logic PL19_INPUT,
-    input logic PL19_READY_IN,
-    input logic PL20_READY_OUT,
+    input  logic PL19_INPUT,
+    input  logic PL19_READY_IN,
+    input  logic PL20_READY_OUT,
     output logic PL19_SHIFT_CMD_M20,
     output logic PL19_WRITE_PULSE,
     output logic PL19_START_INPUT,
@@ -163,9 +168,6 @@ module cpu_top (
     logic PP;
     logic CIR_X;
     logic EB28_29, EB30_31;
-
-    // Invert Gate EB
-    //logic EB;
         
     acc_reg acc_reg_inst (.*);
     control_gate control_gate_inst (.*);

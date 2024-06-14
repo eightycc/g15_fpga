@@ -17,57 +17,61 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Input Output 11 and Register MZ (Page 6, 3D592)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module io_11_mz (
-    input logic rst,
-    input logic CLOCK,
+    input  logic rst,
+    input  logic CLOCK,
     
-    input logic T0,
-    input logic T29,
-    input logic TE,
+    input  logic T0,
+    input  logic T29,
 
-    input logic C1, CV,
-    input logic D4, D5, DX,
-    input logic S4, S5, SX,
+    input  logic D4, D5, DX,
+    input  logic S4, S5, SX,
 
-    input logic CIR_C,
-    input logic CIR_Q,
-    input logic CIR_R,
-    input logic CF,
-    input logic CN,
-    input logic DS,
-    input logic FAST,
-    input logic FAST_OUT,
-    input logic IN,
-    input logic KEY_E,
-    input logic KEY_T,
-    input logic LB,
-    input logic OA1, OA4,
-    input logic OC1, OC2, OC3, OC4,
-    //input logic OC3_s, OC4_s,
-    input logic OD,
-    input logic OE,
-    input logic OF2, OF3,
-    input logic OG,
-    input logic OH,
-    //input logic OH_s,
-    input logic OY,
-    input logic MP_CLR_M19,
-    input logic MP_SET_M19,
-    input logic MP_CLR_M23,
-    input logic READY,
-    input logic SLOW_IN,
-    input logic SLOW_OUT,
-    input logic SW_SA,
-    input logic TR,
+    input  logic CIR_C,
+    input  logic CIR_Q,
+    input  logic CIR_R,
+    input  logic CN,
+    input  logic FAST,
+    input  logic FAST_OUT,
+    input  logic IN,
+    input  logic KEY_T,
+    input  logic LB,
+    input  logic OA1, OA4,
+    input  logic OC1, OC2,
+    input  logic OD,
+    input  logic OE,
+    input  logic OF2, OF3,
+    input  logic OG,
+    input  logic OY,
+    input  logic MP_CLR_M19,
+    input  logic MP_SET_M19,
+    input  logic MP_CLR_M23,
+    input  logic READY,
+    input  logic SLOW_OUT,
+    input  logic TR,
     
-    input logic CR_TAB_OF,
-    input logic WAIT_OF,
-    input logic DIGIT_OF,
+    input  logic CR_TAB_OF,
+    input  logic WAIT_OF,
+    input  logic DIGIT_OF,
+`ifdef G15_ANC_2
+    input  logic OC_r,
+`endif
     
+`ifdef G15_GROUP_III
     output logic AS,
     output logic AUTO,
+    input  logic C1, CV,
+    input  logic CF,
+    input  logic DS,
+    input  logic KEY_E,
+    input  logic OC3, OC4,
+    input  logic OH,
+    input  logic SLOW_IN,
+    input  logic SW_SA,
+    input  logic TE,
+`endif
     output logic CIR_U,
     output logic CIR_V,
     output logic CIR_ALPHA,       // AR to output logic word 00 & OE
@@ -83,14 +87,18 @@ module io_11_mz (
     
 );
     
+`ifdef G15_GROUP_III
     logic AS_s, AS_r;
+`endif
     logic OZ_s, OZ_r;
     logic M19_in, M19_recirc, M19_insert;
     logic M23_in, M23_recirc;
     logic MZ_in;
     
     always_comb begin
+`ifdef G15_GROUP_III
       AUTO = AS & SLOW_IN; // automatic reload
+`endif
       CIR_U = OC1 | OC2; 
       CIR_V = CR_TAB_OF | WAIT_OF | DIGIT_OF;
       CIR_ALPHA = OZ & OE & SLOW_OUT & ~OC1 & ~OC2; // Type AR or M19
@@ -101,7 +109,8 @@ module io_11_mz (
       EB19 = M19 & S4 & SX;
       EB23 = M23 & S5 & SX;
     end
-    
+
+`ifdef G15_GROUP_III    
     // ---------------------------------------------------------------------------------
     // AS:
     // ---------------------------------------------------------------------------------
@@ -111,13 +120,13 @@ module io_11_mz (
       // OHs = 
       AS_s =   (DS & ~CV & C1)    // Auto-reload I/O instruction
              | (SW_SA & KEY_E);   // Start type-in alphanumeric
-      // Schematic *may* indicate diode AND gates with these terms, but it's hard to
-      // see how that would make sense.
-      //              & (OH_s)
-      //              & (OC3_s)              // op bit 9 set
-      //              & (OC4_s);             // op bit 10 set
+  `ifdef G15_ANC_2
+      AS_r = OC_r;
+  `else
       AS_r = READY;
+  `endif
     end
+`endif
 
     // ---------------------------------------------------------------------------------
     // OZ:
@@ -139,7 +148,7 @@ module io_11_mz (
     end
     
     always_comb begin
-      // Instead of gating M19 recirculation it is blocked by OR'ing  
+      // Instead of gating M19 recirculation it is blocked by OR'ing (by De Morgan's theorom) 
       M19_recirc =   (~M19)
                    | (TR & D4 & DX)
                    | (MP_CLR_M19)
@@ -161,22 +170,30 @@ module io_11_mz (
       // CIR_C: OG & OY & FAST_OUT
       M23_recirc =   (M23)
                    & (SLOW_OUT | ~OG)
+`ifdef G15_GROUP_III
                    & (~AS | ~OY | ~OC3 | ~OC4)      // ~(AUTO & OY)
+`endif
                    & (~D5 | (~DX & TR))
                    & ~MP_CLR_M23;                   // <M23 CLEAR> button
       M23_in =   (M23_recirc)
-               | (D5 & DX & LB)                     // LB->M23
-               | (IN & OG & OA4 & ~OF3)             // 4-bit prec, insert OA4
-               | (IN & OG & ~OH & OA1 & OF3)        // 1-bit prec, insert OA1
-               | (CIR_C & OA4)                      // insert OA4, mag tape out
-               | (MZ & OG & ~OY & FAST_OUT)         // MZ->M23, mag tape out
+`ifdef G15_GROUP_III
 // Note: Schematic 3D592 shows signal "SLOW IN (PR2 AUTO)", but condensed schematic
 //  68 and schematic 3D589 show "AUTO" instead. Since this term controls auto-reload
 //  marker insertion, it is assumed that "AUTO" is the correct signal.
-               | (TE & OY & ~CF & AUTO & ~OG);      // marker, bit 1 of even words
+               | (AUTO & OY & ~OG & TE & ~CF)       // marker, bit 1 of even words
+               | (IN & OG & OF3 & OA1 & ~OH)        // 1-bit prec, insert OA1
+`else
+               | (IN & OG & OF3 & OA1)              // 1-bit prec, insert OA1
+`endif
+               | (IN & OG & OA4 & ~OF3)             // 4-bit prec, insert OA4
+               | (D5 & DX & LB)                     // LB->M23
+               | (CIR_C & OA4)                      // insert OA4, mag tape out
+               | (MZ & OG & ~OY & FAST_OUT);        // MZ->M23, mag tape out
     end
 
+`ifdef G15_GROUP_III
     sr_ff ff_AS ( .clk(CLOCK), .rst(rst), .s(AS_s), .r(AS_r), .q(AS) );
+`endif
     sr_ff ff_OZ ( .clk(CLOCK), .rst(rst), .s(OZ_s), .r(OZ_r), .q(OZ) );
     drum_track #( .N(116) ) track_MZ ( .clk(CLOCK), .din(MZ_in), .dout(MZ) );
     drum_track #( .N(3132) ) track_M19 ( .clk(CLOCK), .din(M19_in), .dout(M19) );

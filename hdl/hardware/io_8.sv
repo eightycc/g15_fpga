@@ -17,28 +17,29 @@
 // ----------------------------------------------------------------------------
 // Bendix G-15 Input Output 8 (Page 5, 3D591)
 // ----------------------------------------------------------------------------
-`timescale 1ns / 1ps
+`include "g15_config.vh"
 
 module io_8 (
-
-    input logic PHOTO_READER_PERMIT,
-    input logic PHOTO_TAPE_FWD,
-    input logic FAST_IN, FAST_OUT,
-    input logic SLOW_IN, SLOW_OUT,
-    input logic SW_PUNCH,
-    input logic CIR_F,
-    input logic DS,
-    input logic S3, SW,
-    input logic OA1, OA2, OA3, OA4,
-    input logic OB3,
-    input logic OC1, OC2,
-    input logic OF1, OF2, OF3,
-    input logic OD,
-    input logic OE,
-    input logic OG,
-    input logic OY,
-    input logic STOP_OB,
-    input logic TYPE,
+`ifdef G15_PR_1
+    input  logic PHOTO_READER_PERMIT,
+`endif
+    input  logic PHOTO_TAPE_FWD,
+    input  logic FAST_IN, FAST_OUT,
+    input  logic SLOW_IN, SLOW_OUT,
+    input  logic SW_PUNCH,
+    input  logic CIR_F,
+    input  logic DS,
+    input  logic S3, SW,
+    input  logic OA1, OA2, OA3, OA4,
+    input  logic OB3,
+    input  logic OC1, OC2,
+    input  logic OF1, OF2, OF3,
+    input  logic OD,
+    input  logic OE,
+    input  logic OG,
+    input  logic OY,
+    input  logic STOP_OB,
+    input  logic TYPE,
 
     output logic CARD_PUNCH_SIGNAL,
     output logic CARD_READ_PULSE,
@@ -72,8 +73,13 @@ module io_8 (
                      | (SLOW_OUT & OG & ~OC1 & OC2);
 
       PHOTO_TAPE_REV = FAST_IN & OC2;
+`ifdef G15_PR_1
       PHOTO_READER_REV = PHOTO_TAPE_REV & PHOTO_READER_PERMIT;
       PHOTO_READER_FWD = PHOTO_TAPE_FWD & PHOTO_READER_PERMIT;
+`else
+      PHOTO_READER_REV = PHOTO_TAPE_REV;
+      PHOTO_READER_FWD = PHOTO_TAPE_FWD;
+`endif
 
       TYPE_PULSE = TYPE & ~OD & ~OE & OY & ~OC2;
 
