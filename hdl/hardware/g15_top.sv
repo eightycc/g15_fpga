@@ -24,13 +24,11 @@ module g15_top (
     input  logic CLOCK,
     input  logic tick_ms,
 
-    // Turn-on Cycle Controls
-    input  logic PWR_CLEAR,
-    input  logic PWR_NO_CLEAR,
-    input  logic PWR_OP,
-    input  logic PWR_NO_OP,
-    input  logic PWR_AUTO_TAPE_START,
-    input  logic PWR_NT,
+    // Front Panel
+    input  logic SW_DC_RESET,
+    input  logic SW_DC_OFF,
+    output logic LITE_DC_ON,
+    output logic LITE_READY,
 
     // Remote Neon Panel Connector PL-14
     output logic PL14_1_CQ,
@@ -188,6 +186,14 @@ module g15_top (
     output logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX,
     output logic CM
 );
+    // Turn-on Cycle Controls
+    logic PWR_CLEAR;
+    logic PWR_NO_CLEAR;
+    logic PWR_OP;
+    logic PWR_NO_OP;
+    logic PWR_AUTO_TAPE_START;
+    logic PWR_NT;
+    logic WAIT_FOR_TAPE;
 
     // Timing
     logic T2, T13, T21, T28;
@@ -263,6 +269,10 @@ module g15_top (
     logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5;
     logic PHOTO_TAPE_FWD;
     logic PHOTO_TAPE_REV;
+
+    always_comb begin
+      WAIT_FOR_TAPE = PL6_18_WAIT_FOR_TAPE;
+    end
 
     always_comb begin
       PL14_1_CQ = CQ;
@@ -353,6 +363,7 @@ module g15_top (
       PL6_11_REMOTE_REWIND = SW_REWIND;
     end
 
+    turn_on turn_on_inst (.*);
     timing timing_inst (.*);
     cpu_top cpu_top_inst (.*);
     mem_top mem_top_inst (.*);

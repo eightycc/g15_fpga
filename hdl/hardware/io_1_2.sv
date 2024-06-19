@@ -125,6 +125,9 @@ module io_1_2 (
     //
     //     For slow output, OF1, OF2, and OF3 form a shift register used during
     //     output formatting.
+    //
+    //     For <T> (xfer N to AR) OF2 along with CIR_BETA, CIR_DELTA, and CIR_EPSILON
+    //     time the transfer of WT+1 from CN into the upper bits of AR.
     // ---------------------------------------------------------------------------------
     always_comb begin
       // CIR_A: ~OD & CIR_Q

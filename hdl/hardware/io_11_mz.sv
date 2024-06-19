@@ -102,9 +102,10 @@ module io_11_mz (
       CIR_U = OC1 | OC2; 
       CIR_V = CR_TAB_OF | WAIT_OF | DIGIT_OF;
       CIR_ALPHA = OZ & OE & SLOW_OUT & ~OC1 & ~OC2; // Type AR or M19
-      CIR_BETA = READY & KEY_T & OF2;
-      CIR_EPSILON = T0 & CIR_BETA;
-      CIR_DELTA = ~T29 & CIR_BETA & CN;
+      CIR_BETA = READY & KEY_T & OF2;               // <T> transfer N to AR
+      CIR_EPSILON = T0 & CIR_BETA;                  // Special case for T29 of W107 that
+                                                    //   disambiguates N=00 and N=20
+      CIR_DELTA = ~T29 & CIR_BETA & CN;             // CN WT+1 (T22-T28)
       CIR_GAMMA = CIR_ALPHA & CIR_V & M19_insert;
       EB19 = M19 & S4 & SX;
       EB23 = M23 & S5 & SX;
