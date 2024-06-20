@@ -272,19 +272,24 @@ module control_gate (
 
     // ---------------------------------------------------------------------------------
     // Start-stop system
+    //
+    // G15 Group I introduces a potential meta-stability condition when the compute
+    // switch is in the neutral position. This occurs during the turn-on sequence
+    // when (W107 & TAPE_START) resulting in both CH_s and CH_r being set to 1.
+    // Addition of CZ to the Group I terms prevents this condition from occuring.
     // ---------------------------------------------------------------------------------
     always_comb begin
-      CH_s =   (SW_BP & T21 & RC & CI)    // breakpoint
-             | (SW_NO_GO & RC)            // single-cycle
+      CH_s =   (SW_BP & T21 & RC & CI)      // breakpoint
+             | (SW_NO_GO & RC)              // single-cycle
 `ifdef G15_GROUP_I
-             | (W107 & SW_SA & KEY_F)     // set N = 00
-             | (W107 & TAPE_START)        // phototape start
+             | (W107 & SW_SA & KEY_F & CZ)  // set N = 00
+             | (W107 & TAPE_START & CZ)     // phototape start
 `endif
-             | (DS & S4 & SU);            // HALT
+             | (DS & S4 & SU);              // HALT
       CH_r = ~CZ;
     
-      CZ_s = ~CZ & (SW_GO | (SW_SA & KEY_I)) & T0;
-      CZ_r = CZ & ~(SW_GO | (SW_SA & KEY_I)) & T0;
+      CZ_s = ~CZ & (SW_GO | SW_BP | (SW_SA & KEY_I)) & T0;
+      CZ_r = CZ & ~(SW_GO | SW_BP | (SW_SA & KEY_I)) & T0;
     end
     
     // ---------------------------------------------------------------------------------

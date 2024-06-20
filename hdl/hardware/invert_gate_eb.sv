@@ -130,6 +130,9 @@ module invert_gate_eb (
 
     // --------------------------------------------------------------
     // Overflow detection and register
+    //
+    // Addtition of the ~TS to the DS term in FE_r corrects a potential
+    // metastability where TS and DS are set simultaneously.
     // --------------------------------------------------------------
     always_comb begin
       FE_s = TS;
@@ -137,7 +140,7 @@ module invert_gate_eb (
              | (AA & DV & IS & ~TS)
              | (PA & DW & IS & ~TS);
 
-      OVFLW =   (DA_OVFLW)
+      OVFLW =  (DA_OVFLW)
              | (TS & ~AR & AC & FE)
              | (TS & ~PP & PC & FE)
              | (TS & ~AR & ~AC & IC & D7 & DV)

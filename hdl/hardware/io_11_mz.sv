@@ -134,7 +134,7 @@ module io_11_mz (
     // ---------------------------------------------------------------------------------
     always_comb begin
       OZ_s = T0;
-      // The ~T0 term is added to avoid potential meta-stability during G-15 start-up
+      // The ~T0 term is added to avoid potential meta-stability during G-15 turn-on
       // where T0 occurs every word time until the CN track is initialized.
       OZ_r = T29 & OZ & ~T0;
     end
