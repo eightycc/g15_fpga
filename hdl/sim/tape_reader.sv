@@ -23,7 +23,7 @@ module tape_reader (
     input  logic clk,
     input  logic rst,
     
-    input  tick_ms,
+    input  logic tick_ms,
     
     output logic PL6_1_PHOTO1, PL6_2_PHOTO2, PL6_4_PHOTO3, PL6_5_PHOTO4, PL6_7_PHOTO5,
     input  logic PL6_9_PHOTO_TAPE_FWD,      // PL6-9  to relay RY-A
@@ -32,10 +32,10 @@ module tape_reader (
     // closed, it energizes R4-C, starting the reverse motor and disabling the
     // REWIND position of SWITCH_1 on the photo reader.
     output logic PL6_18_WAIT_FOR_TAPE,      // PL6-18 when RY-A or RY-B is energized
-    output logic PL6_TAPE_RUN_SW,           // PL6-17 to punch
-    input logic SW1_REWIND,
-    input logic SW1_FORWARD,
-    input logic SW2
+    output logic PL6_17_TAPE_RUN_SW,        // PL6-17 to punch
+    input  logic SW1_REWIND,
+    input  logic SW1_FORWARD,
+    input  logic SW2
     );
     
     logic ry_a_pick, ry_a_pulled;   // forward motor control
@@ -141,11 +141,11 @@ module tape_reader (
       top_motor_run = ry_a_pulled;
       bot_motor_run = ry_b_pulled;
       PL6_18_WAIT_FOR_TAPE = ry_a_pulled | ry_b_pulled;
-      PL6_TAPE_RUN_SW = SW2;
+      PL6_17_TAPE_RUN_SW = SW2;
       r4_c_pick = PL6_11_REMOTE_REWIND;
     end
     
-    relay relay_ry_a (.*, .pick(ry_a_pick), .pulled(ry_a_pulled));
-    relay relay_ry_b (.*, .pick(ry_b_pick), .pulled(ry_b_pulled));
-    relay relay_r4_c (.*, .pick(r4_c_pick), .pulled(r4_c_pulled));
+    relay relay_ry_a (.*, .tick(tick_ms), .e(ry_a_pick), .c(ry_a_pulled), .ar(0));
+    relay relay_ry_b (.*, .tick(tick_ms), .e(ry_b_pick), .c(ry_b_pulled), .ar(0));
+    relay relay_r4_c (.*, .tick(tick_ms), .e(r4_c_pick), .c(r4_c_pulled), .ar(0));
 endmodule

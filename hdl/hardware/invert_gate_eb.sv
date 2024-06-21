@@ -63,9 +63,10 @@ module invert_gate_eb (
     logic IP_s, IP_r;
     logic IS_s, IS_r;
     logic OVFLW;
-    logic TR_TVA_from_MQ_IP_PN;
-    logic TR_TVA_to_MQ_IP_PN;
-    logic EB_to_LB_block;
+    logic TR_TVA_from_ID_MQ_PN;
+    logic TR_TVA_to_ID_MQ_PN;
+    logic TR_TVA_from_ID_MQ_PN_to_NOT_ID_MQ_PN;
+    logic EB_to_IB_block;
     logic PN_TR_to_PN;
 
     // --------------------------------------------------------------
@@ -81,26 +82,26 @@ module invert_gate_eb (
       // Convenience decodes not part of original schematics
       // TR or TVA to ID, MQ, or PN during sign-bit transfer
       //   Dest. ID, MQ, or PN: D6 & ~(DX & TR)
-      //   TR or TVA: ~CW & (CS | ~CX)
-      TR_TVA_to_MQ_IP_PN = TS & TR & D6 & ~(DX & TR) & ~CW & (CS | ~CX);
+      //   TR or TVA: ~CW & (~CX | CS)
+      TR_TVA_to_ID_MQ_PN = TS & TR & D6 & ~(DX & TR) & ~CW & (~CX | CS);
       // TR or TVA from ID, MQ, or PN during sign-bit
-      TR_TVA_from_MQ_IP_PN = TS & S6 & ~CW & (CS | ~CX);
-      // TR or TVA from ID, MQ, or PN not to S6 during sign-bit
-      //TR_TVA_from_MQ_IP_PN_not_to_S6 = TR_TVA_from_MQ_IP_PN & ~D6 & IP;
+      TR_TVA_from_ID_MQ_PN = TS & S6 & ~SX & (~CX | CS) & ~CW;
       // TR from PN to PN
-      PN_TR_to_PN = TR_TVA_to_MQ_IP_PN & IP & ~CX & S6 & SW & DW;
+      PN_TR_to_PN = IP & TR_TVA_to_ID_MQ_PN & S6 & SW & ~CX & DW;
+      // TR or TVA from ID, MQ, or PN to ~(ID, MQ, PN, or 'TEST')
+      TR_TVA_from_ID_MQ_PN_to_NOT_ID_MQ_PN = IP & ~D6 & TR_TVA_to_ID_MQ_PN;
 
       // IP: Buffers the EB sign bit when transferring 2-WD lines
-      IP_s = TR_TVA_to_MQ_IP_PN & (~S6 | SX) & EB & ~IP;
-      IP_r =   (EB & TR_TVA_to_MQ_IP_PN & (~S6 | SX) & ~(DV & TR) & IP)
-             | (~EB & TR_TVA_to_MQ_IP_PN & (~S6 | SX) & DV & IP)
+      IP_s = TR_TVA_to_ID_MQ_PN & (~S6 | SX) & EB & ~IP;
+      IP_r =   (EB & TR_TVA_to_ID_MQ_PN & (~S6 | SX) & ~(DV & TR) & IP)
+             | (~EB & TR_TVA_to_ID_MQ_PN & (~S6 | SX) & DV & IP)
              | (PG_CLEAR);
 
-      // EB to LB transfer sign blocking
-      EB_to_LB_block = ~(  TR_TVA_from_MQ_IP_PN
-                         | TR_TVA_to_MQ_IP_PN
-                         | (TS & ~CS & CX)
-                         | (IC & ~TS)  );
+      // EB to IB transfer blocking
+      EB_to_IB_block =   TR_TVA_from_ID_MQ_PN   // block sign for source MQ, ID, PN 
+                       | TR_TVA_to_ID_MQ_PN     // block sign for dest MQ, ID, PN
+                       | (TS & CX & ~CS)        // block sign for SU, AV
+                       | (IC & ~TS);            // block T2 to T29 for invert
     end
 
 
@@ -109,23 +110,23 @@ module invert_gate_eb (
     // --------------------------------------------------------------
     always_comb begin
       // IB: Intermediate Bus Mux
-      IB =   (~EB & IC & ~TS)
-           | (EB & EB_to_LB_block)
-           | (PN_TR_to_PN)
-           | (IP & ~D6 & TR_TVA_to_MQ_IP_PN)
-           | (~EB & ~CS & CX & CW & TS);
+      IB =   (~EB & IC & ~TS)                   // insert inverted EB 2 to 29
+           | (EB & ~EB_to_IB_block)             // insert EB not blocked
+           | (TS & CW & (CX & ~CS) & ~EB)       // insert sign for +no., SU
+           | (TR_TVA_from_ID_MQ_PN_to_NOT_ID_MQ_PN)
+           | (PN_TR_to_PN);
 
-      // IC: Whether to complement EB->LB transfer
+      // IC: When to invert EB->LB transfer
       IC_s = IS & EB & ~TS & TR;
       IC_r = TS;
 
-      // IS: When to invert EB->LB transfer
-      IS_s =   (TS & CW & (CS | ~CX) & ~EB)
-             | (PN_TR_to_PN)
-             | (EB & (CS | ~CX) & CW & TS);
+      // IS: Whether to complement EB->LB transfer
+      IS_s =   (TS & CW & (CX & ~CS) & ~EB)  // +no., SU
+             | (TS & CW & (~CX | CS) & EB)   // -no., AD, AVA
+             | (PN_TR_to_PN);
       IS_r =   (RC)
-             | ((CS | ~CX) & ~EB & CW & TS)
-             | (~CS & CX & EB & TS);    
+             | (TS & CW & (~CX | CS) & ~EB)  // +no., AD, AVA
+             | (TS & (~CS & CX) & EB);       // -no., SU, AV  
     end
 
     // --------------------------------------------------------------
@@ -136,7 +137,7 @@ module invert_gate_eb (
     // --------------------------------------------------------------
     always_comb begin
       FE_s = TS;
-      FE_r =   (DS)
+      FE_r =   (DS & ~TS)
              | (AA & DV & IS & ~TS)
              | (PA & DW & IS & ~TS);
 
