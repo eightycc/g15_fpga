@@ -113,6 +113,8 @@ module io_top (
     input  logic CN,
     input  logic M2, M3,
     output logic M19, M23,
+    output logic M19_in, M23_in,
+    output logic MZ_in,
     output logic EB19, EB23,
 
     input  logic T0, T1, T21, T29,

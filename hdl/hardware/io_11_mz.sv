@@ -81,8 +81,11 @@ module io_11_mz (
     output logic CIR_GAMMA,
     output logic EB19, EB23,
     output logic M19,
+    output logic M19_in,
     output logic M23,
+    output logic M23_in,
     output logic MZ,
+    output logic MZ_in,
     output logic OZ               // Word 0 T1 to T29
     
 );
@@ -91,9 +94,9 @@ module io_11_mz (
     logic AS_s, AS_r;
 `endif
     logic OZ_s, OZ_r;
-    logic M19_in, M19_recirc, M19_insert;
-    logic M23_in, M23_recirc;
-    logic MZ_in;
+    logic M19_recirc, M19_insert;
+    logic M23_recirc;
+    //logic MZ_in;
     
     always_comb begin
 `ifdef G15_GROUP_III

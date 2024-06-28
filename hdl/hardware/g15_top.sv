@@ -182,9 +182,25 @@ module g15_top (
     // Debugging Assists
     //   Timing
     output logic T0, T1, T29,
+    output logic TE, TF,
     //   CPU
     output logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX,
-    output logic CM
+    //   Drum Memory Tracks
+    output logic AA,
+    output logic CN_in,
+    output logic CM_in,
+    output logic MZ_in,
+    output logic ID_in,
+    output logic MQ_in,
+    output logic PN_in,
+    output logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in,
+    output logic M7_in, M8_in, M9_in, M10_in, M11_in,
+    output logic M12_in, M13_in, M14_in, M15_in, M16_in, M17_in, M18_in,
+    output logic M19_in, M20_in, M21_in, M22_in, M23_in,
+    //   Buses
+    output logic EB,
+    output logic IB,
+    output logic LB
 );
     // Turn-on Cycle Controls
     logic PWR_CLEAR;
@@ -197,18 +213,18 @@ module g15_top (
 
     // Timing
     logic T2, T13, T21, T28;
-    logic TE, TF, TS;
+    logic TS;
 
     // CPU
     logic D0, D1, D2, D3, D4, D5, DU, DV, DW, DX;
     logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX;
 
     logic AR;
-    logic CC, CE, CF, CG, CH, CN, CQ;
+    logic CC, CE, CF, CG, CH, CM, CN, CQ;
     logic DS;
     logic FO;
     logic IP;
-    logic LB;
+    //logic LB;
     logic TR;
     logic KEY_MARK;
 

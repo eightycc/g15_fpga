@@ -45,6 +45,9 @@ module prod_gate (
     output logic CIR_X,
     output logic EB28_29,
     output logic EB30_31,
+    output logic ID_in,
+    output logic MQ_in,
+    output logic PN_in,
     output logic PA,
     output logic PC,
     output logic PG_CLEAR,
@@ -63,9 +66,8 @@ module prod_gate (
     logic PR;
     logic PU, PU_block;
 
-    logic ID_in, ID_block_recirc;
-    logic MQ_in, MQ_block_recirc;
-    logic PN_in;
+    logic ID_block_recirc;
+    logic MQ_block_recirc;
 
     // -----------------------------------------------------------------------
     // Early Bus Inputs

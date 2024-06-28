@@ -58,7 +58,11 @@ module mem_top (
     output logic EB7, EB8, EB9, EB10, EB11, EB12, EB13, EB14,
     output logic EB15, EB16, EB17, EB18,
     output logic EB21, EB22, EB25, EB26, EB27, EB31,
-    output logic MC_not
+    output logic MC_not,
+    output logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in,
+    output logic M7_in, M8_in, M9_in, M10_in, M11_in,
+    output logic M12_in, M13_in, M14_in, M15_in, M16_in, M17_in, M18_in,
+    output logic M20_in, M21_in, M22_in
 );
 
 `ifdef G15_CA_2

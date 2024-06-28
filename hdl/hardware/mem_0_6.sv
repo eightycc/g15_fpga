@@ -49,14 +49,14 @@ module mem_0_6 (
     output logic EB5,
     output logic EB6,
 
-    output logic MC_not
+    output logic MC_not,
+    output logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in
 );
 
     logic CD1_s, CD1_r;
     logic CD2_s, CD2_r;
     logic CD3_s, CD3_r;
 
-    logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in;
     logic M4, M5, M6;
 
     always_comb begin

@@ -185,9 +185,24 @@ module g15_alpha_ut (
     // Debugging Assists
     //   Timing
     logic T0, T1, T29;
+    logic TE, TF;
     //   CPU
     logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX;
-    logic CM;
+    //   Drum Memory Tracks
+    logic AA;
+    logic CM_in;
+    logic CN_in;
+    logic MZ_in;
+    logic ID_in;
+    logic MQ_in;
+    logic PN_in;
+    logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in, M7_in, M8_in, M9_in;
+    logic M10_in, M11_in, M12_in, M13_in, M14_in, M15_in, M16_in, M17_in, M18_in;
+    logic M19_in, M20_in, M21_in, M22_in, M23_in;
+    //   Busses
+    logic EB;
+    logic IB;
+    logic LB;
 
     // PL2A connector to I/O Writer
     logic PL2A_1_MAG_42;     // < >
@@ -484,6 +499,126 @@ module g15_alpha_ut (
       forever #(4650) CLOCK = ~CLOCK;
     end
 
+    // ------------------------------------------------------------------------------
+    // Debug: Collect drum tracks and other serial data into buffers for analysis.
+    // ------------------------------------------------------------------------------
+    logic [4:0] bit_ctr = '0;
+    logic [1:0] qw_ctr = '0;
+    logic [6:0] word_ctr = '0;
+
+    logic [28:0] AR_buf = '0;
+    logic [28:0] CM_buf = '0;
+    logic [3:0][28:0] MZ_buf = '0;
+    logic [107:0][28:0] CN_buf = '0;
+    logic [1:0][28:0] ID_buf = '0;
+    logic [1:0][28:0] MQ_buf = '0;
+    logic [1:0][28:0] PN_buf = '0;
+    logic [107:0][28:0] M0_buf = '0;
+    logic [107:0][28:0] M1_buf = '0;
+    logic [107:0][28:0] M2_buf = '0;
+    logic [107:0][28:0] M3_buf = '0;
+    logic [107:0][28:0] M4_buf = '0;
+    logic [107:0][28:0] M5_buf = '0;
+    logic [107:0][28:0] M6_buf = '0;
+    logic [107:0][28:0] M7_buf = '0;
+    logic [107:0][28:0] M8_buf = '0;
+    logic [107:0][28:0] M9_buf = '0;
+    logic [107:0][28:0] M10_buf = '0;
+    logic [107:0][28:0] M11_buf = '0;
+    logic [107:0][28:0] M12_buf = '0;
+    logic [107:0][28:0] M13_buf = '0;
+    logic [107:0][28:0] M14_buf = '0;
+    logic [107:0][28:0] M15_buf = '0;
+    logic [107:0][28:0] M16_buf = '0;
+    logic [107:0][28:0] M17_buf = '0;
+    logic [107:0][28:0] M18_buf = '0;
+    logic [107:0][28:0] M19_buf = '0;
+    logic [3:0][28:0] M20_buf = '0;
+    logic [3:0][28:0] M21_buf = '0;
+    logic [3:0][28:0] M22_buf = '0;
+    logic [3:0][28:0] M23_buf = '0;
+    logic [107:0][28:0] EB_buf = '0;
+    logic [107:0][28:0] IB_buf = '0;
+    logic [107:0][28:0] LB_buf = '0;
+
+    initial begin
+      forever @(posedge CLOCK) begin
+        AR_buf[bit_ctr] = AA;
+        CM_buf[bit_ctr] = CM_in;
+        MZ_buf[qw_ctr][bit_ctr] = MZ_in;
+        CN_buf[word_ctr][bit_ctr] = CN_in;
+        ID_buf[TE][bit_ctr] = ID_in;
+        MQ_buf[TE][bit_ctr] = MQ_in;
+        PN_buf[TE][bit_ctr] = PN_in;
+        M0_buf[word_ctr][bit_ctr] = M0_in;
+        M1_buf[word_ctr][bit_ctr] = M1_in;
+        M2_buf[word_ctr][bit_ctr] = M2_in;
+        M3_buf[word_ctr][bit_ctr] = M3_in;
+        M4_buf[word_ctr][bit_ctr] = M4_in;
+        M5_buf[word_ctr][bit_ctr] = M5_in;
+        M6_buf[word_ctr][bit_ctr] = M6_in;
+        M7_buf[word_ctr][bit_ctr] = M7_in;
+        M8_buf[word_ctr][bit_ctr] = M8_in;
+        M9_buf[word_ctr][bit_ctr] = M9_in;
+        M10_buf[word_ctr][bit_ctr] = M10_in;
+        M11_buf[word_ctr][bit_ctr] = M11_in;
+        M12_buf[word_ctr][bit_ctr] = M12_in;
+        M13_buf[word_ctr][bit_ctr] = M13_in;
+        M14_buf[word_ctr][bit_ctr] = M14_in;
+        M15_buf[word_ctr][bit_ctr] = M15_in;
+        M16_buf[word_ctr][bit_ctr] = M16_in;
+        M17_buf[word_ctr][bit_ctr] = M17_in;
+        M18_buf[word_ctr][bit_ctr] = M18_in;
+        M19_buf[word_ctr][bit_ctr] = M19_in;
+        M20_buf[qw_ctr][bit_ctr] = M20_in;
+        M21_buf[qw_ctr][bit_ctr] = M21_in;
+        M22_buf[qw_ctr][bit_ctr] = M22_in;
+        M23_buf[qw_ctr][bit_ctr] = M23_in;
+        EB_buf[word_ctr][bit_ctr] = EB;
+        IB_buf[word_ctr][bit_ctr] = IB;
+        LB_buf[word_ctr][bit_ctr] = LB;
+
+        bit_ctr = T29? 0 : bit_ctr + 1;
+        if (T29) begin
+            qw_ctr = TF? 0 : qw_ctr + 1;
+            word_ctr = T0? 0 : word_ctr + 1;
+        end
+      end
+    end
+
+    function automatic void print_word(ref logic [28:0] b);
+      string s = $sformatf("%08x %01x %3d %1x %3d %01x %02d(%02x) %02d(%02x) %1x",
+                           b, b[28], b[27:21], b[20], b[19:13],
+                           b[12:11], b[10:6], b[10:6], b[5:1], b[5:1], b[0]);
+      $display("%s", s);
+    endfunction
+
+    function automatic void print_29(ref logic [28:0] b);
+      $write("   : ");
+      print_word(b);
+    endfunction
+
+    function automatic void print_58(ref logic [1:0][28:0] b);
+      for (int i = 0; i < 2; i++) begin
+        $write("%3d: ", i);
+        print_word(b[i]);
+      end
+    endfunction
+
+    function automatic void print_116(ref logic [3:0][28:0] b);
+      for (int i = 0; i < 4; i++) begin
+        $write("%3d: ", i);
+        print_word(b[i]);
+      end
+    endfunction
+
+    function automatic void print_3132(ref logic [107:0][28:0] b);
+      for (int i = 0; i < 108; i++) begin
+        $write("%3d: ", i);
+        print_word(b[i]);
+      end
+    endfunction
+
     initial begin
       // FPGA reset line released after 500 clock cycles
       repeat(500) @(posedge CLOCK);
@@ -503,9 +638,61 @@ module g15_alpha_ut (
       // Wait 1 second
       repeat(1000) @(posedge tick_ms);
 
+      @(posedge T0) begin
+        $display("AR:");
+        print_29(AR_buf);
+        $display("CM:");
+        print_29(CM_buf);
+        $display("MZ:");
+        print_116(MZ_buf);
+        $display("ID:");
+        print_58(ID_buf);
+        $display("MQ:");
+        print_58(MQ_buf);
+        $display("PN:");
+        print_58(PN_buf);
+        $display("CN:");
+        print_3132(CN_buf);
+      end
+
       // Run ops for 5 seconds
       PL1A_51_GO = 1;
       repeat (5000) @(posedge tick_ms);
+
+      @(posedge T0) begin
+        $display("AR:");
+        print_29(AR_buf);
+        $display("CM:");
+        print_29(CM_buf);
+        $display("MZ:");
+        print_116(MZ_buf);
+        $display("ID:");
+        print_58(ID_buf);
+        $display("MQ:");
+        print_58(MQ_buf);
+        $display("PN:");
+        print_58(PN_buf);
+        $display("CN:");
+        print_3132(CN_buf);
+        $display("M0:");
+        print_3132(M0_buf);
+        $display("M1:");
+        print_3132(M1_buf);
+        $display("M2:");
+        print_3132(M2_buf);
+        $display("M3:");
+        print_3132(M3_buf);
+        $display("M19:");
+        print_3132(M19_buf);
+        $display("M20:");
+        print_116(M20_buf);
+        $display("M21:");
+        print_116(M21_buf);
+        $display("M22:");
+        print_116(M22_buf);
+        $display("M23:");
+        print_116(M23_buf);
+      end
 
       $finish;
     end

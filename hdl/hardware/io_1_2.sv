@@ -271,11 +271,15 @@ module io_1_2 (
 `endif
 
     // ---------------------------------------------------------------------------------
-    // OY:
+    // OY: For slow-out operations:
+    //     (1) OY_s: Slow-out waiting for feedback (CIR_G & ~HC)
+    //     
+    //     
     // ---------------------------------------------------------------------------------
     always_comb begin
-      // CIR_E: IN & ~OF1 & OF2 & TF
-      // CIR_F: OE & T0
+      // CIR_E: IN & ~OF1 & OF2 & TF    //     
+      // CIR_F:  OE & T0
+      // CIR_G: ~OE & T0
       // CIR_H: OY & ~OG & FAST_OUT & ~OB2 & OB4
       // CIR_S: CIR_E(IN & ~OF1 & OF2 & TF) & SLOW
       // CIR_U: OC1 | OC2
@@ -292,7 +296,7 @@ module io_1_2 (
              | (SLOW_OUT & ~HC & ~OY & ~OH & ~OS & T0);  // (G-III)
 `else
              | (~OB5 & OB3 & ~OB2 & CIR_S)         // (~G-III) [STOP + RELOAD]OB
-             | (SLOW_OUT & CIR_G & ~HC);           // (~G-III)
+             | (SLOW_OUT & CIR_G & ~HC);           // (1) Waiting for HC feedback
 `endif
       OY_r =   (OY & TF & IN)
 `ifdef G15_GROUP_III

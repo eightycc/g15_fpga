@@ -101,6 +101,8 @@ module control_gate (
     output logic CH,
     output logic CI,
     output logic CJ,
+    output logic CM_in,
+    output logic CN_in,
     output logic CM,
     output logic CN,
     output logic CQ,
@@ -137,8 +139,10 @@ module control_gate (
     logic CJ_s, CJ_r;
     logic CK, CK_s, CK_r;
     logic CL, CL_s, CL_r;
-    logic CM_in;
-    logic CN_in, CN_CLR, CN_NT;
+    //logic CM;
+    //logic CM_in;
+    //logic CN_in;
+    logic CN_CLR, CN_NT;
     logic CQ_s, CQ_r;
     logic CT, CT_s, CT_r;
     logic CU;

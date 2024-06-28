@@ -97,6 +97,7 @@ module cpu_top (
     input  logic EB21, EB22, EB25, EB26, EB27, EB31,
 
     // Accumulator Register
+    output logic AA,
     output logic AR,
     output logic LB,
     
@@ -108,9 +109,14 @@ module cpu_top (
     output logic CH,
     //output logic CJ,
     output logic CM,
+    output logic CM_in,
+    output logic CN_in,
     output logic CN,
     output logic CQ,
     output logic FO,
+    output logic ID_in,
+    output logic MQ_in,
+    output logic PN_in,
     //output logic RC,
     output logic TR,
     output logic KEY_MARK,
@@ -122,6 +128,8 @@ module cpu_top (
     output logic DS,
 
     // Invert Gate EB
+    output logic EB,
+    output logic IB,
     output logic IP,
 
     // Accessory interface on connectors PL19 and PL20
@@ -138,7 +146,7 @@ module cpu_top (
 );
     
     // Accumulator Register
-    logic AA;
+    //logic AA;
     logic AC;
     logic AC_s;
     logic EB32;
@@ -152,7 +160,6 @@ module cpu_top (
     logic CJ;
     logic CS;
     
-    logic IB;
     logic IC;
     logic IS;
     logic RC;

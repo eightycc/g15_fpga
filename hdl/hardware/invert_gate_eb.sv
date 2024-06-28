@@ -49,6 +49,7 @@ module invert_gate_eb (
     input  logic TS,
     input  logic CIR_X,
 
+    output  logic EB,
     output  logic FO,
     output  logic IB,
     output  logic IC,
@@ -56,7 +57,7 @@ module invert_gate_eb (
     output  logic IS
 );
 
-    logic EB;
+    //logic EB;
     logic FE_s, FE_r, FE;
     logic FO_s, FO_r;
     logic IC_s, IC_r;

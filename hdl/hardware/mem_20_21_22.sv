@@ -43,10 +43,10 @@ module mem_20_21_22 (
     output logic EB27,
     output logic EB31,
 
-    output logic M20
+    output logic M20,
+    output logic M20_in, M21_in, M22_in
 );
 
-    logic M20_in, M21_in, M22_in;
     logic M21, M22;
 
     always_comb begin
