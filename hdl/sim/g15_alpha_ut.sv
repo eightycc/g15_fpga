@@ -186,6 +186,9 @@ module g15_alpha_ut (
     //   Timing
     logic T0, T1, T29;
     logic TE, TF;
+    //   Sequencing
+    logic CG;
+    logic RC;
     //   CPU
     logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX;
     //   Drum Memory Tracks
@@ -199,6 +202,7 @@ module g15_alpha_ut (
     logic M0_in, M1_in, M2_in, M3_in, M4_in, M5_in, M6_in, M7_in, M8_in, M9_in;
     logic M10_in, M11_in, M12_in, M13_in, M14_in, M15_in, M16_in, M17_in, M18_in;
     logic M19_in, M20_in, M21_in, M22_in, M23_in;
+    logic CD1, CD2, CD3;
     //   Busses
     logic EB;
     logic IB;
@@ -541,6 +545,9 @@ module g15_alpha_ut (
     logic [107:0][28:0] IB_buf = '0;
     logic [107:0][28:0] LB_buf = '0;
 
+    // ------------------------------------------------------------------------------
+    // Capture drum tracks and other serial data into buffers for analysis.
+    // ------------------------------------------------------------------------------
     initial begin
       forever @(posedge CLOCK) begin
         AR_buf[bit_ctr] = AA;
@@ -618,6 +625,39 @@ module g15_alpha_ut (
         print_word(b[i]);
       end
     endfunction
+
+    // ------------------------------------------------------------------------------
+    // Log an instruction whenever an RC cycle occurs
+    // ------------------------------------------------------------------------------
+    initial begin
+      forever @(posedge CLOCK) begin
+        if (T29 & RC) begin
+          if (CG) begin
+            $write("RC@AR  : ");
+            print_word(AR_buf);
+          end else begin
+            case ({CD3, CD2, CD1})
+                3'b000: begin $write("RC@M0(%3d): ", word_ctr);  print_word(M0_buf[word_ctr]); end
+                3'b001: begin $write("RC@M1(%3d): ", word_ctr);  print_word(M1_buf[word_ctr]); end
+                3'b010: begin $write("RC@M2(%3d): ", word_ctr);  print_word(M2_buf[word_ctr]); end
+                3'b011: begin $write("RC@M3(%3d): ", word_ctr);  print_word(M3_buf[word_ctr]); end
+                3'b100: begin $write("RC@M4(%3d): ", word_ctr);  print_word(M4_buf[word_ctr]); end
+                3'b101: begin $write("RC@M5(%3d): ", word_ctr);  print_word(M5_buf[word_ctr]); end
+                3'b110: begin $write("RC@M19(%3d): ", word_ctr); print_word(M19_buf[word_ctr]); end
+                3'b111: begin $write("RC@M23(%3d): ", qw_ctr);   print_word(M23_buf[qw_ctr]); end
+            endcase
+          end
+          $display("  AR:");
+          print_29(AR_buf);
+          $display("  CM:");
+          print_29(CM_buf);
+          $display("  M23:");
+          print_116(M23_buf);
+          $display("  MZ:");
+          print_116(MZ_buf);
+         end
+      end
+    end
 
     initial begin
       // FPGA reset line released after 500 clock cycles

@@ -177,7 +177,7 @@ module io_11_mz (
 `ifdef G15_GROUP_III
                    & (~AS | ~OY | ~OC3 | ~OC4)      // ~(AUTO & OY)
 `endif
-                   & (~D5 | (~DX & TR))
+                   & (~D5 | ~(DX & TR))
                    & ~MP_CLR_M23;                   // <M23 CLEAR> button
       M23_in =   (M23_recirc)
 `ifdef G15_GROUP_III

@@ -36,7 +36,7 @@ module mem_0_6 (
     input  logic KEY_C,
     input  logic READY,
     input  logic SW_SA,
-    input  logic TAPE_START,
+    input  logic PWR_AUTO_TAPE_START,
     input  logic TYPE1, TYPE2, TYPE3,
 
     output logic CD1, CD2, CD3,
@@ -62,19 +62,19 @@ module mem_0_6 (
     always_comb begin
       CD1_s =   (CW & DS & S5 & ~C8)
               | (READY & TYPE1 & SW_SA)
-              | (TAPE_START);
+              | (PWR_AUTO_TAPE_START);
       CD1_r =   (~CW & DS & S5 & ~C8)
               | (SW_SA & KEY_C);
 
       CD2_s =   (CX & DS & S5 & ~C8)
               | (READY & TYPE2 & SW_SA)
-              | (TAPE_START);
+              | (PWR_AUTO_TAPE_START);
       CD2_r =   (~CX & DS & S5 & ~C8)
               | (SW_SA & KEY_C);
 
       CD3_s =   (C1 & DS & S5 & ~C8)
               | (READY & TYPE3 & SW_SA)
-              | (TAPE_START);
+              | (PWR_AUTO_TAPE_START);
       CD3_r =   (~C1 & DS & S5 & ~C8)
               | (SW_SA & KEY_C);
 

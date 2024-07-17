@@ -63,7 +63,7 @@ module io_3_4 (
     input  logic SIGN_OF,
 `endif
     input  logic FAST_OUT,
-    input  logic KEY_FB,
+    input  logic TYPE_FB,
     input  logic M19,
     input  logic M23,
     input  logic MAG1_IN, MAG2_IN, MAG3_IN, MAG4_IN, MAG5_IN,
@@ -128,7 +128,11 @@ module io_3_4 (
       IN3 = PUNCHED_TAPE3 | PHOTO3 | TYPE3 | MAG3_IN | CARD_INPUT3;
       IN4 = PUNCHED_TAPE4 | PHOTO4 | TYPE4 | MAG4_IN | CARD_INPUT4;
       IN5 = PUNCHED_TAPE5 | PHOTO5 | TYPE5 | MAG5_IN | CARD_INPUT5;
+    end
     
+    // ---------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
+    always_comb begin
       HC =   (FAST_OUT & OC2 & PUNCH_SYNC)
 `ifndef G15_GROUP_III
            | (TYPE & ~OC2 & ~OF3)
@@ -136,7 +140,7 @@ module io_3_4 (
            | (IN1)
            | (IN2)
            | (IN3)
-           | (KEY_FB)
+           | (TYPE_FB)
            | (SW_SA & SLOW_OUT)
            | (IN5);
     end

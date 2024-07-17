@@ -35,7 +35,7 @@ module io_1_2 (
     input  logic CIR_4,
     input  logic CIR_M,    // (5,6) CIR_N & SLOW_OUT & ~OE
     input  logic KEY_E,
-    input  logic KEY_FB,   // <F-B> Typewriter feedback
+    input  logic TYPE_FB,  // <F-B> Typewriter feedback
     input  logic M23,
     input  logic OA1, OA3,
     input  logic OC4,
@@ -108,15 +108,18 @@ module io_1_2 (
     logic STOP_OF;
     
     // ---------------------------------------------------------------------------------
-    // OF register control character decode
+    // OF register control character decode. For slow-out operations, OF1, OF2, and OF3
+    // are used to buffer the 3-bit control character shifted in from formatting code
+    // words in M2 (M19 data out) or M3 (AR data out).
     // ---------------------------------------------------------------------------------
     always_comb begin
-      DIGIT_OF  = ~OF1 & ~OF2 & ~OF3;
-      SIGN_OF   =  OF1 & ~OF2 & ~OF3;
-      CR_TAB_OF =         OF2 & ~OF3;
-      STOP_OF   = ~OF1 & ~OF2 &  OF3;
-      RELOAD_OF =  OF1 & ~OF2 &  OF3;
-      WAIT_OF   =  OF1 &  OF2 &  OF3;
+      DIGIT_OF  = ~OF1 & ~OF2 & ~OF3;  // M19<->OAs->OBs->Output
+      SIGN_OF   =  OF1 & ~OF2 & ~OF3;  // OS->OB1->Output
+      CR_TAB_OF =         OF2 & ~OF3;  // OFs->OBs->Output
+      STOP_OF   = ~OF1 & ~OF2 &  OF3;  // (M19 == 0)? Stop->Output, Reset OCs
+                                       //           : Change to RELOAD
+      RELOAD_OF =  OF1 & ~OF2 &  OF3;  // OFs->OBs->Output, Reload format
+      WAIT_OF   =  OF1 &  OF2 &  OF3;  // OFs->OBs->Output
     end
 
     // ---------------------------------------------------------------------------------
@@ -146,35 +149,36 @@ module io_1_2 (
               | (CIR_D);    // Out: CIR_Q (MZ->OF1, OF2->OF3->MZ control) & OD
 
       OF1_s =   (IN & HC & ~OF2 & ~STOP_OB)        // In:  HC synchronization
-              | (CIR_A & MZ)                       // Out: MZ->OF1
-              | (CIR_C & OA4)
-              | (CIR_U & STOP_OF & SLOW_OUT & ~OG & M19) // convert STOP to RELOAD (M19 != 0)
-              | (CIR_U & CIR_D & M2)
-              | (CIR_D & ~OC1 & ~OC2 & M3);
-      OF1_r =   (IN & ~HC)                         // Input HC synchronization
-              | (CIR_A & ~MZ)                      // Output MZ->OF1
-              | (CIR_H)
-              | (CIR_U & CIR_D & ~M2)
-              | (CIR_D & ~OC1 & ~OC2 & ~M3)
+              | (CIR_A & MZ)                       // Slow out: MZ->OF1
+              | (CIR_C & OA4)                      // Fast out: OA4->OF1
+              | (CIR_U & STOP_OF & SLOW_OUT & ~OG & M19)
+                                                   // Slow out: convert STOP to RELOAD (M19 != 0)
+              | (CIR_U & CIR_D & M2)               // Slow out: M19 format by M2
+              | (CIR_D & ~OC1 & ~OC2 & M3);        // Slow out: AR format by M3
+      OF1_r =   (IN & ~HC)                         // In: HC synchronization
+              | (CIR_A & ~MZ)                      // Slow out: MZ->OF1
+              | (CIR_H)                            // Fast out:
+              | (CIR_U & CIR_D & ~M2)              // Slow out:
+              | (CIR_D & ~OC1 & ~OC2 & ~M3)        // Slow out:
               | (READY);
                    
-      OF2_s =   (READY & SW_SA & KEY_T & CC & T21)
+      OF2_s =   (READY & SW_SA & KEY_T & CC & T21) // N -> AR: Transfer start
               | (CIR_J & OF1);                     // I/O: OF1->OF2  
-      OF2_r =   (READY & T29)
+      OF2_r =   (READY & T29)                      // N -> AR: Transfer end
               | (CIR_J & (OUT | TF) & ~OF1);       // I/O: OF1->OF2
                 
-      OF3_s =   (CIR_S & CR_TAB_OB)                // SLOW_IN
+      OF3_s =   (CIR_S & CR_TAB_OB)                // Slow in: 1-bit precession
 `ifdef G15_GROUP_III
-              | (AUTO & OG & TF & OA3 & OH & OS)   // (G-III)
+              | (AUTO & OG & TF & OA3 & OH & OS)   // Slow in: 1-bit precession
 `else
-              | (TYPE & OY & CIR_G)                // (~G-III)
+              | (TYPE & OY & CIR_G)                // Slow out:
 `endif
-              | (CIR_Q & OF2)
-              | (~(DS & S1) & ~OF2 & FAST_IN);
-      OF3_r =   (CIR_Q & ~OF2)
+              | (CIR_Q & OF2)                      // Slow out: OF2->OF3
+              | (~(DS & S1) & ~OF2 & FAST_IN);     // Fast_in:
+      OF3_r =   (CIR_Q & ~OF2)                     // Slow out: OF2->OF3
               | (READY)
-              | (CIR_S & OB5)
-              | (CIR_S & WAIT_OB);
+              | (CIR_S & OB5)                      // Slow in: 4-bit precession
+              | (CIR_S & WAIT_OB);                 // Slow in: 4-bit precession
     end       
     
     
@@ -285,27 +289,27 @@ module io_1_2 (
       // CIR_U: OC1 | OC2
       // CIR_W: CIR_U & CIR_F & ~OY & FAST_OUT & ~OB3
       // CIR_Z: ~OY & ~OG & TF & FAST_OUT & OB3
-      OY_s =   (CIR_W)
-             | (CIR_Z)
+      OY_s =   (CIR_W)                             // Fast-out:
+             | (CIR_Z)                             // Fast-out:
 `ifdef G15_GROUP_III
-             | (DS & ~CV & C1 & AUTO & TF)         // (G-III)
-             | (KEY_E & SW_SA & T0)                // (G-III)
-             | (AUTO & OG & TF & OA3)              // (G-III)
-             | (AUTO & OG & TF & M23)              // (G-III)
-             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // (G-III) [STOP + RELOAD]OB
-             | (SLOW_OUT & ~HC & ~OY & ~OH & ~OS & T0);  // (G-III)
+             | (DS & ~CV & C1 & AUTO & TF)         // Slow-in:
+             | (KEY_E & SW_SA & T0)                // Start alphanumeric input
+             | (AUTO & OG & TF & OA3)              // Slow-in:
+             | (AUTO & OG & TF & M23)              // Slow-in:
+             | (~OB5 & OB3 & ~OB2 & CIR_S & ~AS)   // Slow-in: [STOP + RELOAD]OB
+             | (SLOW_OUT & ~HC & ~OY & ~OH & ~OS & T0);  // Slow-out:
 `else
-             | (~OB5 & OB3 & ~OB2 & CIR_S)         // (~G-III) [STOP + RELOAD]OB
-             | (SLOW_OUT & CIR_G & ~HC);           // (1) Waiting for HC feedback
+             | (~OB5 & OB3 & ~OB2 & CIR_S)         // Slow_in: [STOP + RELOAD]OB
+             | (SLOW_OUT & CIR_G & ~HC);           // Slow_out: Waiting for HC feedback
 `endif
-      OY_r =   (OY & TF & IN)
+      OY_r =   (OY & TF & IN)                      // In:
 `ifdef G15_GROUP_III
-             | (KEY_FB & ~OH & TYPE & AS)          // (G-III)
-             | (CIR_F & TYPE & OY)                 // (G-III)
+             | (TYPE_FB & ~OH & TYPE & AS)         // Slow-out:
+             | (CIR_F & TYPE & OY)                 // Slow-out:
 `else
-             | (CIR_F & TYPE)                      // (~G-III)
+             | (CIR_F & TYPE)                      // Slow-out:
 `endif
-             | (CIR_H & OF1)
+             | (CIR_H & OF1)                       // Fast-out:
              | (READY);
     end              
     

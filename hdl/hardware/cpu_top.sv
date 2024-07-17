@@ -117,7 +117,7 @@ module cpu_top (
     output logic ID_in,
     output logic MQ_in,
     output logic PN_in,
-    //output logic RC,
+    output logic RC,
     output logic TR,
     output logic KEY_MARK,
     
@@ -162,7 +162,6 @@ module cpu_top (
     
     logic IC;
     logic IS;
-    logic RC;
     logic TR_r;
     logic KEY_RETURN;
 

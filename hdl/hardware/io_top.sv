@@ -49,7 +49,6 @@ module io_top (
     // Typewriter Interface
     input  logic KEY_A,
     input  logic KEY_B,
-    input  logic KEY_FB,
     input  logic KEY_P,
     input  logic KEY_Q,
     input  logic KEY_CIR_S,
@@ -58,6 +57,7 @@ module io_top (
     input  logic SW_PUNCH,
     input  logic SW_SA,
 
+    input  logic TYPE_FB,
     input  logic TYPE1, TYPE2, TYPE3, TYPE4, TYPE5,
 
     output logic TYPE,

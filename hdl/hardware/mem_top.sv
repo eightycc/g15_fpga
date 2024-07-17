@@ -47,7 +47,7 @@ module mem_top (
 `endif
     input  logic M19, M23,
     input  logic READY,
-    input  logic TAPE_START,
+    input  logic PWR_AUTO_TAPE_START,
     input  logic TYPE1, TYPE2, TYPE3,
 
     output logic CD1, CD2, CD3,

@@ -183,6 +183,9 @@ module g15_top (
     //   Timing
     output logic T0, T1, T29,
     output logic TE, TF,
+    //   Sequencing
+    output logic CG,
+    output logic RC,
     //   CPU
     output logic C1, C2, C3, C4, C5, C6, C7, C8, C9, CU, CV, CW, CX,
     //   Drum Memory Tracks
@@ -197,6 +200,7 @@ module g15_top (
     output logic M7_in, M8_in, M9_in, M10_in, M11_in,
     output logic M12_in, M13_in, M14_in, M15_in, M16_in, M17_in, M18_in,
     output logic M19_in, M20_in, M21_in, M22_in, M23_in,
+    output logic CD1, CD2, CD3,
     //   Buses
     output logic EB,
     output logic IB,
@@ -220,7 +224,7 @@ module g15_top (
     logic S0, S1, S2, S3, S4, S5, S6, S7, SU, SV, SW, SX;
 
     logic AR;
-    logic CC, CE, CF, CG, CH, CM, CN, CQ;
+    logic CC, CE, CF, CH, CM, CN, CQ;
     logic DS;
     logic FO;
     logic IP;
@@ -230,7 +234,7 @@ module g15_top (
 
     // Memory
     logic M0, M1, M2, M3, M19, M20, M23, MC_not;
-    logic CD1, CD2, CD3;
+    //logic CD1, CD2, CD3;
 
     // I/O
 `ifdef G15_GROUP_III
@@ -272,7 +276,6 @@ module g15_top (
 `ifdef G15_GROUP_I
     logic KEY_F;
 `endif
-    logic KEY_FB;
     logic KEY_I;
     logic KEY_M;
     logic KEY_P;
@@ -280,6 +283,8 @@ module g15_top (
     logic KEY_R;
     logic KEY_CIR_S;
     logic KEY_T;
+    
+    logic TYPE_FB;
 
     // Built-in Phototape Reader
     logic PHOTO1, PHOTO2, PHOTO3, PHOTO4, PHOTO5;
@@ -365,7 +370,7 @@ module g15_top (
       TYPE3 = PL1_15_LEV3_OUT;
       TYPE4 = PL1_16_LEV4_OUT;
       TYPE5 = PL1_12_LEV5_OUT;
-      KEY_FB = PL1_17_F_B;
+      TYPE_FB = PL1_17_F_B;
     end
 
     always_comb begin
