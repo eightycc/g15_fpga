@@ -1,5 +1,6 @@
 # DIAPER CDC Publication 60064900 January 1964
 # BLOCK SELECTION - REEL 2
+# Expected checksum: -.u05v1ww
 
 # Line 0
 # Page 96
@@ -98,7 +99,7 @@
 85:  .87.69.3.00.28   #87: .0000001
 
 # Constants reconstructed from code comments and comparing with BLOCK SELECTION - REEL 1
-#03:
+03:  .0000020         # AR format
 39: u.00.00.0.01.01   # constant to increment S and D by 1
 12:  .xxxxxx0
 20: -.u05v1ww         # Block selection checksum
@@ -115,3 +116,6 @@
 67:  .0000013
 70:  .0000017
 88:  .0000018
+u4:  .u05v1ww         # balance block selection checksum
+u5:  .46xz010         # balance interrogator checksum
+u6: -.2y21010         # checksum adjustment factor (calculated)

@@ -137,5 +137,7 @@ u3: w.87.74.3.21.31
 56:  .0000001
 92:  .0001700
 
+66: -.u9u62wu   # checksum balancing factor (calculated)
+
 # Unused: 01, 07, 12, 24, 39, 44, 52, 55, 58, 72, 84, 86, u7
 # Bal.: 66

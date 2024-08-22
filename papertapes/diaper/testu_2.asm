@@ -2,7 +2,9 @@
 # Test u MULTIPLY AND DIVIDE
 
 # Line 2
+# Expected checksum: .1yv38y3
 # Page 63
+
 47: u.53.53.0.00.22
 53:  .55.56.0.00.22
 56:  .59.59.0.23.31
@@ -141,3 +143,5 @@ u6:  .00.04.0.22.27
 01:  .0008800
 
 # Unused locations: 46
+
+46: -.y5yw000   # Checksum balancing factor (calculated)

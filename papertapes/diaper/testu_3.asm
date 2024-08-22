@@ -2,7 +2,9 @@
 # Test u MULTIPLY AND DIVIDE
 
 # Line 3
+# Expected checksum: .zxx9zw7
 # Page 65
+
 76:  .80.82.0.22.27
 
 83:  .83.83.0.28.31
@@ -135,3 +137,5 @@ u5:  .01.20.0.28.22
 51:  .53.00.6.21.31
 
 # Unused location 03, 34
+
+34: -.636w000   # Checksum adjustment factor (calculated)

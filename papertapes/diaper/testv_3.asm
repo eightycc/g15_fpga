@@ -2,6 +2,7 @@
 # Test v OVERFLOW
 
 # Line 3
+# Expected checksum: .55940v9
 # Page 76
 08:  .11.11.0.23.31
 11: u.16.16.1.26.20
@@ -139,5 +140,6 @@ u2:  .u6.06.0.01.29
 77:  .79.79.4.21.31
 
 # Page 81
-03:  .0000022
-18: -.353548w
+03:  .0000022   # Format for test ID
+#18: -.353548w   # Bal.
+18:  .865yv74   # Checksum adjustment factor (calculated)

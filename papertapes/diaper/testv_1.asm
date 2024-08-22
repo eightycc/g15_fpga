@@ -2,6 +2,7 @@
 # Test v OVERFLOW
 
 # Line 1
+# Expected checksum: .z7vy2zw
 # Page 81
 
 # NOTE: The dump of line 1 on pg.81 is in reverse order

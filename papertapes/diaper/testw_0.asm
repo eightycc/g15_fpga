@@ -2,6 +2,7 @@
 # Test w AR AS SOURCE OF COMMAND
 
 # Line 0
+# Expected checksum: -.5067118
 # Page 82
 
 00: u.01.01.0.19.00
@@ -88,19 +89,20 @@ u1:  .17.60.0.00.28
 
 96:  .98.15.0.15.31
 
-05: -.uz98yy8
-12:  .uz98yy8
-17:  .wwww012
-03:  .0000022
-20:  .0000032
+05: -.uz98yy8   # Line 0 checksum
+12:  .uz98yy8   # Line 0 checksum negated
+17:  .wwww012   # Test ID
+03:  .0000022   # AR typeout format
+20:  .0000032   # Number of trials
 34:  .zzzzzzz
-41:  .0000001
-24:  .0001000
-47:  .0004400
+41:  .0000001   # Constant used to decrement trial counter
+24:  .0001000   # Constant used to increment error counter
+47:  .0004400   # Error typeout format
 58:  .1000000
 83:  .2000000
 u6:  .3000000
-74:  .0010001
+#74:  .0010001   # Bal.
+74: -.12vy22z   # Checksum correction factor (re-calculated)
 
 # Bal.: 74
 # Unused: 23, 27, 39, 43, 48, 49, 56, 61, 62, 68, 69, 70, 71, 79

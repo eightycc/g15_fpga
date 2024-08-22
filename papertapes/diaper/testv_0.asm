@@ -2,6 +2,7 @@
 # Test v OVERFLOW
 
 # Line 0
+# Expected checksum: .0000000
 # Page 71
 
 # Copy this block to line 0 and enter at 00[04]
@@ -147,5 +148,6 @@ u6: u.u7.03.1.03.09   # N modified 05->03
 # Page 81
 05:  .0000000
 #03:  .0000022   # abandoned by patch to 0[39] pg.72
-u7:  .829xvw6
+#u7:  .829xvw6   # Balancing Factor
+u7:  -.7560418   # Checksum balancing factor (calculated)
 

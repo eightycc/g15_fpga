@@ -2,6 +2,7 @@
 # Test 9 SHIFT AND NORMALIZE
 
 # Line 1
+# Expected checksum: -.yx8z933
 # Page 59
 89:  .22.63.0.01.28
 63:  .82.91.4.01.24
@@ -126,5 +127,7 @@ u5:  .0001000
 67:  .0700000
 88:  .0800000
 57:  .0900000
+
+84:  .y21z266   # Checksum balancing factor (calculated)
 
 # Unused: 84, u7

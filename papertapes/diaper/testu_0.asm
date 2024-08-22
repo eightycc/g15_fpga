@@ -2,6 +2,7 @@
 # Test u MULTIPLY AND DIVIDE
 
 # Line 0
+# Expected checksum: .0000000
 # Page 62
 
 00: u.01.01.0.19.00
@@ -116,8 +117,9 @@ u3: -.u12w9y0
 72: -.0000000
 73:  .w95v242
 69:  .1200000
-u2: -.9z51133   # Balance
-02:  .w18174w   # Balance
+#u2: -.9z51133   # Balance
+#02:  .w18174w   # Balance
+u2:  .u93061y   # Checksum Adjustment Factor (calculated)
 23:  .171739z   # Unused
 u7:  .0700000   # Unused
 38:  .28170xz   # Unused

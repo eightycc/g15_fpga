@@ -2,7 +2,9 @@
 # "IP" FLIP FLOP AND ASSOCIATED GATES - Test 8
 
 # Line M04
+# Expected checksum: .x693002
 # Page 44
+
 00: u.01.01.0.19.04   # Copy M19 to M04
 01:  .03.04.4.21.31   # Jump to 04.04
 
@@ -132,3 +134,5 @@ u7:  .444400w
 
 # Bal.: 96, 85, 77
 # Unused: 89, 90, 91, 94, 95, u4
+
+96: -.60wv492   # Checksum correction factor (calculated)

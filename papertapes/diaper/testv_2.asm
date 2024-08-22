@@ -2,6 +2,7 @@
 # Test v OVERFLOW
 
 # Line 2
+# Expected checksum: .z0860u6
 # Page 73
 
 12:  .57.62.3.01.28
@@ -158,3 +159,5 @@ u7:  .02.17.0.01.29
 03:  .000zzu2
 
 # Unused locations: 13, 87, u2
+
+u2: -.x2yw000   # Checksum balancing factor (calculated)

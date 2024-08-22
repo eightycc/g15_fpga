@@ -2,6 +2,7 @@
 # "IP" FLIP FLOP AND ASSOCIATED GATES - Test 8
 
 # Line 2
+# Expected checksum: .uzy5657
 # Page 49
 
 63:  .65.66.5.01.24
@@ -134,6 +135,8 @@ u5:  .00.04.0.23.31
 61:  .0001100
 40:  .0001200
 03:  .zz80022
+
+92: -.yx01200   # checksum adjustment factor (calculated)
 
 # Bal.: 92
 # Unused: 02, u0, u7

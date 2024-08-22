@@ -2,6 +2,7 @@
 # "IP" FLIP FLOP AND ASSOCIATED GATES - Test 8
 
 # Line M01
+# Expected checksum: -.7xw7v2x
 # Page 47
 
 79:  .82.82.0.23.31
@@ -147,5 +148,6 @@ u5:  .00.46.0.23.31
 u0:  .0000001
 48:  .0000700
 67: -.5000020
+u7:  .900z65u   # checksum balancing factor (calculated)
 
 # Unused: 02, 18, 88, 96, u7

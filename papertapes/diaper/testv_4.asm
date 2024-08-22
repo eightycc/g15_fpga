@@ -1,4 +1,5 @@
 # DIAPER CDC Publication 60064900 January 1964
+# Expected checksum: .u480690
 # Test v OVERFLOW
 
 # Line 4
@@ -143,3 +144,5 @@ u5:  .20.35.0.28.01
 02:  .04.42.0.21.31
 
 # Unused locations: 07, 11, 36, 43, 49, 57, 58, 64, 69, 70, 71, 72, 83
+
+83:  .u594000   # Checksum correction factor (calculated)
